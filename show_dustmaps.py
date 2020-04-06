@@ -53,8 +53,8 @@ if __name__ == "__main__":
     #--------------------------------------------
     # Initialization
     # size of dustmap (degree)
-    alpha_size = 16
-    delta_size = 10
+    alpha_size = 5
+    delta_size = 1.5
     diag_size = np.sqrt(alpha_size**2 + delta_size**2)
     step = 0.01
     #--------------------------------------------

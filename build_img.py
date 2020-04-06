@@ -36,6 +36,7 @@ from astropy import wcs
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 
+from dustmaps.planck import PlanckQuery
 from dustmaps.bayestar import BayestarQuery
 #--------------------------------------------
 # Main code
@@ -55,10 +56,12 @@ if __name__ == "__main__":
     #--------------------------------------------
     # Initialization
     # size of dustmap (degree)
-    alpha_size = 16
-    delta_size = 10
+    alpha_size = 5
+    delta_size = 1.5
     diag_size = np.sqrt(alpha_size**2 + delta_size**2)
     step = 0.01
+    # catalog can be PL13, BS19
+    catalog = "PL13"
     #--------------------------------------------
     # Next, we’ll set up a grid of coordinates to plot, centered on the given location: 
     if frame == 'galactic':
@@ -103,8 +106,13 @@ if __name__ == "__main__":
         )
     #--------------------------------------------
     # Then, we’ll load up and query three different dust maps:
-    bayestar = BayestarQuery(max_samples=1)
-    Av = 2.742 * bayestar(coords)
+    Av = None
+    if catalog == "PL13":
+        planck = PlanckQuery()
+        Av = 3.1 * planck(coords)
+    if catalog == "BS19":
+        bayestar = BayestarQuery(max_samples=1)
+        Av = 2.742 * bayestar(coords)
     #--------------------------------------------
     # We’ve assumed RV=3.1, and used the coefficient from Table 6 of Schlafly & Finkbeiner (2011) 
     # to convert SFD and Bayestar reddenings to magnitudes of AV.
@@ -122,24 +130,23 @@ if __name__ == "__main__":
     # MER means Mercator’s projection
     # You can find more available projection from here: 
     # https://docs.astropy.org/en/stable/wcs/
-    w.wcs.ctype = ["RA---MER", "DEC--MER"]
+    w.wcs.ctype = ["RA---CAR", "DEC--CAR"]
     w.wcs.set_pv([(2, 1, 0.0)])
     #-----------------------------------
-    # Test the convertion
-    pixcrd = np.array([[0, 0], [24, 38], [45, 98]], dtype=np.float64)
-    # Convert pixel coordinates to world coordinates.
-    # The second argument is "origin" -- in this case we're declaring we
-    # have 0-based (Numpy-like) coordinates.
-    world = w.wcs_pix2world(pixcrd, 0)
-    print(world)
-    # Convert the same coordinates back to pixel coordinates.
-    pixcrd2 = w.wcs_world2pix(world, 0)
-    print(pixcrd2)
     # Save the image
     header = w.to_header()
     print(Av.shape)
     image = Av[::-1]
-    fits.writeto("test.fits", image, header, overwrite = True)
+    fits.writeto(
+        "{0}_{1}_{2}_{3}.fits".format(
+            catalog,
+            frame, 
+            alpha, 
+            delta), 
+        image, 
+        header, 
+        overwrite = True
+    )
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
