@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 '''
 Abstract:
-    Show the Bayestar 19 dustmap on a given location with WCS coordinate.
+    Show the Bayestar 19 dustmap on a given location, 10x10 deg square.
 Usage:
-    build_img.py galactic [l] [b]
+    show_dustmaps.py galactic [l] [b]
     or
-    build_img.py icrs [RA] [DEC]
+    show_dustmaps.py icrs [RA] [DEC]
 Output:
-    The image with WCS coordinate.
+    The image of dustmap on a given location.
 Editor:
     Jacob975
     People who contribute this website: https://dustmaps.readthedocs.io/en/latest/examples.html#getting-started
@@ -17,10 +17,10 @@ Editor:
 #   This code is made in python3 #
 ##################################
 
-20200327
+20200325
 ####################################
 update log
-20200327 version alpha 1:
+20200325 version alpha 1:
     1. The code works.
 '''
 # First, we’ll import the necessary modules:
@@ -32,11 +32,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import astropy.units as units
-from astropy import wcs
-from astropy.io import fits
 from astropy.coordinates import SkyCoord
 
-from dustmaps.planck import PlanckQuery
 from dustmaps.bayestar import BayestarQuery
 #--------------------------------------------
 # Main code
@@ -47,21 +44,19 @@ if __name__ == "__main__":
     # Load argv
     if len(argv) != 4:
         print ("The number of arguments is wrong.")
-        print ("Usage: build_img.py icrs [RA] [DEC]")
-        print ("Or: build_img.py galactic [l] [b]")
+        print ("Usage: show_dustmaps.py icrs [RA] [DEC]")
+        print ("Or: show_dustmaps.py galactic [l] [b]")
         exit()
     frame = argv[1]
     alpha = argv[2]
     delta = argv[3]
     #--------------------------------------------
     # Initialization
-    # half size of dustmap (degree)
-    alpha_size = 0.75
-    delta_size = 1.4
+    # size of dustmap (degree)
+    alpha_size = 5
+    delta_size = 1.5
     diag_size = np.sqrt(alpha_size**2 + delta_size**2)
     step = 0.01
-    # catalog can be PL13, BS19
-    catalog = "PL13"
     #--------------------------------------------
     # Next, we’ll set up a grid of coordinates to plot, centered on the given location: 
     if frame == 'galactic':
@@ -69,6 +64,14 @@ if __name__ == "__main__":
         b0 = float(delta)
         xlabel = 'l(deg)'
         ylabel = 'b(deg)'
+        extent = [
+            l0+alpha_size, 
+            l0-alpha_size, 
+            b0-delta_size, 
+            b0+delta_size
+        ]
+        # e.g. Aquila South cloud
+        # l0, b0 = (37., -16.)
         l = np.arange(
             l0 + alpha_size, 
             l0 - alpha_size, 
@@ -89,6 +92,11 @@ if __name__ == "__main__":
         DEC0 = float(delta)
         xlabel = 'RA(deg)'
         ylabel = 'DEC(deg)'
+        extent = [
+            RA0+alpha_size, 
+            RA0-alpha_size, 
+            DEC0-delta_size, 
+            DEC0+delta_size]
         RA = np.arange(
             RA0 + alpha_size, 
             RA0 - alpha_size, 
@@ -106,48 +114,41 @@ if __name__ == "__main__":
         )
     #--------------------------------------------
     # Then, we’ll load up and query three different dust maps:
-    Av = None
-    if catalog == "PL13":
-        planck = PlanckQuery()
-        Av = 3.1 * planck(coords)
-    if catalog == "BS19":
-        bayestar = BayestarQuery(max_samples=1)
-        Av = 2.742 * bayestar(coords)
+    bayestar = BayestarQuery(max_samples=1)
+    Av = 2.742 * bayestar(coords)
     #--------------------------------------------
     # We’ve assumed RV=3.1, and used the coefficient from Table 6 of Schlafly & Finkbeiner (2011) 
     # to convert SFD and Bayestar reddenings to magnitudes of AV.
     #
-    # Finally, we make a image with WCS coordinate.
-    # Create a new WCS object.  The number of axes must be set
-    # from the start
-    w = wcs.WCS(naxis=2) 
-    # Set up an "Airy's zenithal" projection
-    # Vector properties may be set with Python lists, or Numpy arrays
-    w.wcs.crpix = [alpha_size//step, delta_size//step]
-    w.wcs.cdelt = np.array([-step, step])
-    w.wcs.crval = [float(alpha), float(delta)]
-    w.wcs.radesys = frame
-    # MER means Mercator’s projection
-    # You can find more available projection from here: 
-    # https://docs.astropy.org/en/stable/wcs/
-    #w.wcs.ctype = ["RA---MER", "DEC--MER"]
-    w.wcs.ctype = ["RA---CAR", "DEC--CAR"]
-    w.wcs.set_pv([(2, 1, 0.0)])
-    #-----------------------------------
-    # Save the image
-    header = w.to_header()
-    print(Av.shape)
-    image = Av[::-1]
-    fits.writeto(
-        "{0}_{1}_{2}_{3}.fits".format(
-            catalog,
+    # Finally, we create the figure using matplotlib:
+    fig, ax = plt.subplots(
+        figsize = (
+            10*alpha_size/diag_size, 
+            10*delta_size/diag_size),
+        dpi = 150
+    )
+    cs = ax.imshow(
+        np.sqrt(Av)[::-1],
+        vmin=0.,
+        vmax=2.,
+        origin='lower',
+        interpolation='nearest',
+        cmap='binary',
+        aspect='equal',
+        extent = extent,
+    )
+    plt.colorbar(cs)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(
+        'Bayestar 19 dust map on {0} ({1},{2})'.format(
             frame, 
             alpha, 
-            delta), 
-        image, 
-        header, 
-        overwrite = True
-    )
+            delta
+        )
+    ) 
+    fig.subplots_adjust(wspace=0., hspace=0.)
+    plt.savefig('BS19_on_{0}_{1}_{2}.png'.format(frame, alpha, delta), dpi=150)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
