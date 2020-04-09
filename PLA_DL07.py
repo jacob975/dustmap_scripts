@@ -4,7 +4,7 @@ Abstract:
     This is a script provide functions to obtain data from the map, 
     COM_CompMap_Dust-DL07-Parameters_2048_R2.00.fits.
 Usage:
-    PLA_DL07_map.py [healpix map]
+    PLA_DL07.py [healpix map]
 Output:
     The image of dustmap on a given location.
 Editor:
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # Load arguemnts
     if len(argv) != 2:
         print("The number of arguments is wrong.")
-        print("Usage: PLA_DL07_map.py [healpix map]")
+        print("Usage: PLA_DL07.py [healpix map]")
         exit()
     map_name = argv[1]
     #-------------------------------------------------

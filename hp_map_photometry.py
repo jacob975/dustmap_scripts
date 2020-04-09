@@ -10,7 +10,6 @@ Output:
     1. Print The result of photometry. 
 Editor:
     Jacob975
-    People who contribute this website: https://gist.github.com/zonca/9c114608e0903a3b8ea0bfe41c96f255 
 
 ##################################
 #   Python3                      #
@@ -36,6 +35,7 @@ from astropy import units as u
 
 from hpproj import hp_project
 from hpproj import hp_photometry
+from hp_map_project import hp_project_script
 #--------------------------------------------
 # Main code
 if __name__ == "__main__":
@@ -98,11 +98,6 @@ if __name__ == "__main__":
     print("Minimum: {0}".format(min_DL07_paras))
     #-------------------------------------------------
     # Make photometry on the given location. 
-    # examples of coordinates
-    # coord_LMC = SkyCoord("05:23:34.60", "-69:45:22.0", unit=(u.hourangle, u.deg))
-    # coord_SMC = SkyCoord("00h52m38s", "-72:48:01", unit=(u.hourangle, u.deg))
-    # coord_Perseus = SkyCoord(54, 31.5, frame = 'icrs', unit = 'deg')
-    # coord_CHA_II = SkyCoord(195, -77, frame = 'icrs', unit = 'deg')
     apertures = \
         Angle(hp.nside2resol(hp_hdu.header['NSIDE'], arcmin=True) / 60 / 4, "deg") \
         * [50, 70, 80]
@@ -111,21 +106,8 @@ if __name__ == "__main__":
     print(apertures)
     result = hp_photometry(hp_hdu, coord, apertures=apertures)
     print(result)
-
-    hdu = hp_project(
-        hp_hdu,
-        coord,
-        pixsize=pixsize, 
-        shape_out = shape_out,
-        projection = ("EQUATORIAL", "TAN"),
-    )
-    plt.title("healpix {0} at ({1}, {2})".format(frame, alpha, delta))
-    cut_data = hdu.data
-    cut_w = WCS(hdu.header)
-    fig = plt.subplot(111, projection = cut_w)
-    plt.imshow(cut_data)
-    plt.savefig("healpix_{0}_{1}_{2}.png".format(frame, alpha, delta))
-    hdu.writeto("healpix_{0}_{1}_{2}.fits".format(frame, alpha, delta), overwrite = True)
+    # Cut a small piece of map for reference.
+    hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

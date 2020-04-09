@@ -10,7 +10,6 @@ Output:
     1. The image of dustmap on a given location.
 Editor:
     Jacob975
-    People who contribute this website: https://gist.github.com/zonca/9c114608e0903a3b8ea0bfe41c96f255 
 
 ##################################
 #   Python3                      #
@@ -35,6 +34,34 @@ from astropy.wcs import WCS
 from astropy import units as u
 
 from hpproj import hp_project
+
+def hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta):
+    #-------------------------------------------------
+    # Cut a small piece from the map, taking LMC and SMC for example
+    # examples of coordinates
+    # coord_LMC = SkyCoord("05:23:34.60", "-69:45:22.0", unit=(u.hourangle, u.deg))
+    # coord_SMC = SkyCoord("00h52m38s", "-72:48:01", unit=(u.hourangle, u.deg))
+    # coord_Perseus = SkyCoord(54, 31.5, frame = 'icrs', unit = 'deg')
+    # coord_CHA_II = SkyCoord(195, -77, frame = 'icrs', unit = 'deg')
+    pixsize = hp.nside2resol(hp_hdu.header['NSIDE'], arcmin=True) / 60 / 4
+    hdu = hp_project(
+        hp_hdu,
+        coord,
+        pixsize=pixsize, 
+        shape_out = shape_out,
+        projection = ("EQUATORIAL", "TAN"),
+    )
+    plt.title("healpix {0} at ({1}, {2})".format(frame, alpha, delta))
+    cut_data = hdu.data
+    cut_w = WCS(hdu.header)
+    fig = plt.subplot(111, projection = cut_w)
+    ax = plt.imshow(cut_data, vmax = 1e7)
+    cbar = plt.colorbar(ax)
+    cbar.set_label(hp_hdu.header['UNIT'], rotation=270, labelpad=15)
+    plt.savefig("healpix_{0}_{1}_{2}.png".format(frame, alpha, delta))
+    hdu.writeto("healpix_{0}_{1}_{2}.fits".format(frame, alpha, delta), overwrite = True)
+    return
+
 #--------------------------------------------
 # Main code
 if __name__ == "__main__":
@@ -62,6 +89,7 @@ if __name__ == "__main__":
         nest=None,
     )
     hp_hdu = fits.ImageHDU(DL07_paras, fits.Header(hp_header))
+    hp_hdu.header['UNIT'] = r"$M_{sun}/kpc^2$"
     # Show the header of this map.
     hdul = fits.open(map_name)
     hdul.info()
@@ -96,23 +124,7 @@ if __name__ == "__main__":
     print("Minimum: {0}".format(min_DL07_paras))
     #-------------------------------------------------
     # Cut a small piece from the map, taking LMC and SMC for example
-    # examples of coordinates
-    # coord_LMC = SkyCoord("05:23:34.60", "-69:45:22.0", unit=(u.hourangle, u.deg))
-    # coord_SMC = SkyCoord("00h52m38s", "-72:48:01", unit=(u.hourangle, u.deg))
-    # coord_Perseus = SkyCoord(54, 31.5, frame = 'icrs', unit = 'deg')
-    # coord_CHA_II = SkyCoord(195, -77, frame = 'icrs', unit = 'deg')
-    hdu = hp_project(
-        hp_hdu,
-        coord,
-        pixsize=pixsize, 
-        shape_out = shape_out)
-    plt.title("healpix {0} at ({1}, {2})".format(frame, alpha, delta))
-    cut_data = hdu.data
-    cut_w = WCS(hdu.header)
-    fig = plt.subplot(111, projection = cut_w)
-    plt.imshow(cut_data)
-    plt.savefig("healpix_{0}_{1}_{2}.png".format(frame, alpha, delta))
-    hdu.writeto("healpix_{0}_{1}_{2}.fits".format(frame, alpha, delta), overwrite = True)
+    hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
