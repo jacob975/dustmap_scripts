@@ -110,7 +110,10 @@ if __name__ == "__main__":
         exit()
     # Image size
     pixsize = hp.nside2resol(hp_hdu.header['NSIDE'], arcmin=True) / 60 / 4
-    shape_out = (768,768)
+    #shape_out = (1024,1024) # Perseus
+    #shape_out = (768,768)
+    #shape_out = (2048, 2048)
+    shape_out = (300,200) # Serpens
     print("pixel size = {0}".format(pixsize))
     print("image size = {0} x {1} deg^2".format(
         shape_out[0]*pixsize, 
