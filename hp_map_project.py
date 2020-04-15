@@ -112,8 +112,13 @@ if __name__ == "__main__":
     pixsize = hp.nside2resol(hp_hdu.header['NSIDE'], arcmin=True) / 60 / 4
     #shape_out = (1024,1024) # Perseus
     #shape_out = (768,768)
+    #shape_out = (512,1024) # Ophiuchus
+    #shape_out = (512,512) # Lupus I
+    #shape_out = (400,400) # Lupus III
+    shape_out = (128,128) # Lupus IV
     #shape_out = (2048, 2048)
-    shape_out = (300,200) # Serpens
+    #shape_out = (300,200) # Serpens
+    #shape_out = (300,256) # Chamaeleon
     print("pixel size = {0}".format(pixsize))
     print("image size = {0} x {1} deg^2".format(
         shape_out[0]*pixsize, 

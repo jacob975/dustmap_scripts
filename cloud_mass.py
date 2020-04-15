@@ -76,6 +76,7 @@ if __name__ == "__main__":
         exit()
     col_den_name = argv[1]
     Av_name = argv[2]
+    print("Arguments:\n{0}".format(argv))
     #--------------------------------------------
     # Load image
     hdu_col = fits.open(col_den_name)
@@ -90,30 +91,28 @@ if __name__ == "__main__":
     # Initialize the parameters
     pix_area_in_deg2_col = abs(h_col['CDELT1'] * h_col['CDELT2']) 
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
-    print (pix_area_in_deg2_col) 
-    print (pix_area_in_deg2_Av) 
     #--------------------------------------------
-    # Estimate the cloud mass
-    #perseus_distance = 281
+    # Given cloud distance
+    # c2d provides:
     perseus_distance = 250
-    Av_2_mask = np.where(Av > 2)
-    Av_3_mask = np.where(Av > 3)
-    Av_5_mask = np.where(Av > 5)
-    Av_7_mask = np.where(Av > 7)
-    Av_9_mask = np.where(Av > 9)
-    Av_15_mask = np.where(Av > 15)
-    Av_18_mask = np.where(Av > 18)
-    calc_cloud_mass(col, Av_2_mask, pix_area_in_deg2_col, perseus_distance)
-    calc_cloud_mass(col, Av_3_mask, pix_area_in_deg2_col, perseus_distance)
-    calc_cloud_mass(col, Av_5_mask, pix_area_in_deg2_col, perseus_distance)
-    calc_cloud_mass(col, Av_7_mask, pix_area_in_deg2_col, perseus_distance)
-    calc_cloud_mass(col, Av_9_mask, pix_area_in_deg2_col, perseus_distance)
-    calc_cloud_mass(col, Av_15_mask, pix_area_in_deg2_col, perseus_distance)
-    calc_cloud_mass(col, Av_18_mask, pix_area_in_deg2_col, perseus_distance)
+    serpens_distance = 260
+    chamaeleon_distance = 178
+    ophiuchus_distance = 125
+    lupus_distance = 150
+    lupus_3_distance = 200
+    # Take one of above.
+    distance = lupus_distance
+    # Estimate the cloud mass
+    print("distance (pc): {0}".format(distance))
+    levels = [2, 3.5, 4, 5, 8] 
+    linewidths = [2, 1.5, 1.5, 1.5, 1]
+    colors = ['k', 'k', 'r', 'k', 'b']
+    print("Av levels: \n{0}".format(levels))
+    for level in levels:
+        Av_mask = np.where(Av > level)
+        calc_cloud_mass(col, Av_mask, pix_area_in_deg2_col, distance)
     #--------------------------------------------
     # Plot the contour
-    levels = [2, 3, 5, 7, 9, 15, 18]
-    linewidths = [2, 1.5, 1, 0.5, 0.5, 0.5, 0.5]
     plt.figure(figsize=(10,8))
     axes = plt.subplot(111, projection = w_col)
     ax = plt.imshow(
@@ -129,7 +128,7 @@ if __name__ == "__main__":
         Av, 
         levels = levels,
         linewidths = linewidths,
-        colors = 'k',   
+        colors = colors,   
     )
     plt.savefig("{0}_Av_contour.png".format(col_den_name[:-5]))
     #-----------------------------------
