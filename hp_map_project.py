@@ -114,8 +114,8 @@ if __name__ == "__main__":
     #shape_out = (768,768)
     #shape_out = (512,1024) # Ophiuchus
     #shape_out = (512,512) # Lupus I
-    #shape_out = (400,400) # Lupus III
-    shape_out = (128,128) # Lupus IV
+    shape_out = (300,300) # Lupus III
+    #shape_out = (128,150) # Lupus IV
     #shape_out = (2048, 2048)
     #shape_out = (300,200) # Serpens
     #shape_out = (300,256) # Chamaeleon

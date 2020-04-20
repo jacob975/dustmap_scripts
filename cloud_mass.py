@@ -101,7 +101,7 @@ if __name__ == "__main__":
     lupus_distance = 150
     lupus_3_distance = 200
     # Take one of above.
-    distance = lupus_distance
+    distance = lupus_3_distance
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
     levels = [2, 3.5, 4, 5, 8] 

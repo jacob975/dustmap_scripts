@@ -150,10 +150,12 @@ if __name__ == "__main__":
         #--------------------------------------------
         # Calculate L_{bol}
         L_bol = alpha_L_mir_to_L_bol(alpha, L_mir)
+        '''
         print("---")
         print(r"$\alpha$ = %f" % alpha)
         print(r"$L_{MIR}$ = %f (solar luminosity)" % L_mir)
         print(r"$L_{bol}$ = %f (solar luminosity)" % L_bol)
+        '''
         alpha_L_array[i, 0] = alpha
         alpha_L_array[i, 1] = L_mir
         alpha_L_array[i, 2] = L_bol
@@ -165,6 +167,16 @@ if __name__ == "__main__":
         header = 'alpha, Lmir, L_bol',
         fmt = '%s',
     )
+    #-----------------------------------
+    # Plot the histogram
+    fig, axes = plt.subplots(figsize = (8,8))
+    plt.hist(
+        alpha_L_array[:, 2],
+        bins = np.logspace(-4, 4, num = 20),
+    )
+    axes.set_xscale("log")
+    axes.set_xlabel(r"$L_{bol}$")
+    plt.savefig("L_bol_hist.png")
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
