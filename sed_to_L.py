@@ -36,29 +36,28 @@ import convert_lib
 def sed_to_L_mir(sed, Q, d):
     # Initialize
     L_mir = 0
-    # Load data
-    J = sed[0]/1000
-    H = sed[1]/1000
-    K = sed[2]/1000
-    IR1 = sed[3]/1000
-    IR2 = sed[4]/1000
-    IR3 = sed[5]/1000
-    IR4 = sed[6]/1000
-    MP1 = sed[7]/1000
-    L_mir = (
-        19.79*J +
-        16.96*H + 
-        10.49*K + 
-        5.50*IR1 + 
-        4.68*IR2 + 
-        4.01*IR3 + 
-        4.31*IR4 + 
-        0.81*MP1
-    )*1e-6*d**2
+    coeffients = np.array([
+        19.79,
+        16.96,
+        10.49,
+        5.50,
+        4.68,
+        4.01,
+        4.31,
+        0.81
+    ])
+    # Skip all band-filled values, convert from mJy to Jy, and times the coeffient.
+    modified_sed = np.zeros(len(Q))
+    modified_sed[np.where(Q != 'U')] = \
+        coeffients[np.where(Q != 'U')] * sed[np.where(Q != 'U')]/1000
+    L_mir = np.sum(modified_sed)*1e-6*d**2
     return L_mir
 
 # Input: SED of a protostar, Quality flag of a protostar
 # Output: The slope of best-fitted line on SED
+#------------------------------------------------
+# TODO
+# Skip band-filled value to prevent artifacts.
 def sed_to_alpha(sed, Q):
     # Initialize
     alpha = 0
@@ -167,8 +166,9 @@ if __name__ == "__main__":
         header = 'alpha, Lmir, L_bol',
         fmt = '%s',
     )
+    '''
     #-----------------------------------
-    # Plot the histogram
+    # Debug: Plot the histogram
     fig, axes = plt.subplots(figsize = (8,8))
     plt.hist(
         alpha_L_array[:, 2],
@@ -177,6 +177,7 @@ if __name__ == "__main__":
     axes.set_xscale("log")
     axes.set_xlabel(r"$L_{bol}$")
     plt.savefig("L_bol_hist.png")
+    '''
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
