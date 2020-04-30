@@ -85,6 +85,21 @@ if __name__ == "__main__":
     IR3upper = np.array(np.transpose([inp_table[:, 49], inp_table[:, 50]]))
     IR4upper = np.array(np.transpose([inp_table[:, 59], inp_table[:, 60]]))
     MP1upper = np.array(np.transpose([inp_table[:, 69], inp_table[:, 70]]))
+    # Load PSF 3 sigma flux density limit data as kind of upper limit
+    IR13slim = np.array(np.transpose([inp_table[:, 33], inp_table[:, 34]]))
+    IR1upper[IR1upper == 'null'] = IR13slim[IR1upper == 'null']
+    
+    IR23slim = np.array(np.transpose([inp_table[:, 43], inp_table[:, 44]]))
+    IR2upper[IR2upper == 'null'] = IR23slim[IR2upper == 'null']
+    
+    IR33slim = np.array(np.transpose([inp_table[:, 53], inp_table[:, 54]]))
+    IR3upper[IR3upper == 'null'] = IR33slim[IR3upper == 'null']
+    
+    IR43slim = np.array(np.transpose([inp_table[:, 63], inp_table[:, 64]]))
+    IR4upper[IR4upper == 'null'] = IR43slim[IR4upper == 'null']
+    
+    MP13slim = np.array(np.transpose([inp_table[:, 73], inp_table[:, 74]]))
+    MP1upper[MP1upper == 'null'] = MP13slim[MP1upper == 'null']
     # Load quality flag
     IR1type = np.array(inp_table[:,21])
     IR2type = np.array(inp_table[:,22])

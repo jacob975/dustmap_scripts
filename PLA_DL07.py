@@ -76,17 +76,21 @@ if __name__ == "__main__":
     min_DL07_paras = np.amin(DL07_paras)
     print("Maximum: {0}".format(max_DL07_paras))
     print("Minimum: {0}".format(min_DL07_paras))
-    index = np.where(DL07_paras)
+    index_neg = np.where(DL07_paras < 1)
+    DL07_paras[index_neg] = 1
     #-------------------------------------------------
     # Draw the map
     hp.mollview(
         DL07_paras, 
         unit=r"$M_{sun}/kpc^2$",
-        #norm = 'log',
+        norm = 'log',
         nest=True,
+        cmap = plt.cm.get_cmap('bone'),
+        max = 10,
+        min = 1,
     )
-    hp.graticule()
-    plt.show()
+    #hp.graticule()
+    plt.savefig("PLA_DL07_all_sky_map.png", dpi = 600)
     #-------------------------------------------------
     # Shows the histogram of parameters
     '''
@@ -109,6 +113,7 @@ if __name__ == "__main__":
     '''
     #-------------------------------------------------
     # Cut a small piece from the map, taking LMC and SMC for example
+    '''
     coord_LMC = SkyCoord("05:23:34.60", "-69:45:22.0", unit=(u.hourangle, u.deg))
     coord_SMC = SkyCoord("00h52m38s", "-72:48:01", unit=(u.hourangle, u.deg))
     coord_Perseus = SkyCoord(54, 31.5, frame = 'icrs', unit = 'deg')
@@ -126,6 +131,7 @@ if __name__ == "__main__":
     plt.imshow(cut_data)
     plt.savefig("test_2.png")
     hdu.writeto("test_2.fits", overwrite = True)
+    '''
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
