@@ -3,11 +3,10 @@
 Abstract:
     This is a script to cut a small piece from healpix map and converted to wcs coordinate. 
 Usage:
-    hp_map_project.py [healpix map] icrs [RA] [DEC]
-    or
-    hp_map_project.py [healpix map] galactic [l] [b]
+    hp_map_project.py [option file] [map name]
 Output:
     1. The image of dustmap on a given location.
+    2. The option file
 Editor:
     Jacob975
 
@@ -21,18 +20,21 @@ Editor:
 update log
 20200408 version alpha 1:
     1. The code works.
+20200505 version alpha 2:
+    1. Update the arguement implementation.
 '''
 import time
 import matplotlib.pyplot as plt
 import numpy as np
 import healpy as hp
 from sys import argv
+from os import system
 
 from astropy.io import fits
 from astropy.coordinates import SkyCoord 
 from astropy.wcs import WCS
 from astropy import units as u
-
+from input_lib import option_hp_map_project
 from hpproj import hp_project
 
 def hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta):
@@ -69,16 +71,24 @@ if __name__ == "__main__":
     start_time = time.time()
     #-------------------------------------------------
     # Load arguemnts
-    if len(argv) != 5:
+    # Argument Assistent (aa)
+    default_option_file_name = 'option_hp_map_project.txt'
+    aa = option_hp_map_project(default_option_file_name)
+    if len(argv) != 3:
         print("The number of arguments is wrong.")
-        print("Usage: hp_map_project.py [healpix map] icrs [RA] [DEC]")
-        print("or")
-        print("hp_map_project.py [healpix map] galactic [l] [b]")
+        print("Usage: hp_map_project.py [option file] [map name]")
+        print("Please edit option file (option_hp_map_project.txt) before execution.")
+        aa.create()
         exit()
-    map_name = argv[1]
-    frame = argv[2]
-    alpha = argv[3]
-    delta = argv[4]
+    option_file_name = argv[1]
+    map_name = argv[2]
+    # Load detail options from option file.
+    option_list = aa.load(option_file_name)
+    frame = option_list[0]
+    alpha = option_list[1]
+    delta = option_list[2]
+    ds9_width = option_list[3]
+    ds9_height = option_list[4]
     #-------------------------------------------------
     # Load map
     DL07_paras, hp_header = hp.read_map(
@@ -98,8 +108,7 @@ if __name__ == "__main__":
     print(repr(hdr))
     print("### END of HEADER ###") 
     #--------------------------------------------------
-    # Initialize
-    # The target coordinate
+    # Initialize the target coordinate
     if frame == 'icrs':
         coord = SkyCoord(float(alpha), float(delta), frame = 'icrs', unit = 'deg')
     elif frame == 'galactic':
@@ -110,19 +119,21 @@ if __name__ == "__main__":
         exit()
     # Image size
     pixsize = hp.nside2resol(hp_hdu.header['NSIDE'], arcmin=True) / 60 / 4
+    #shape_out = (height, width)
     #shape_out = (1024,1024) # Perseus
-    #shape_out = (768,768)
     #shape_out = (512,1024) # Ophiuchus
     #shape_out = (512,512) # Lupus I
-    shape_out = (300,300) # Lupus III
+    #shape_out = (300,300) # Lupus III
     #shape_out = (128,150) # Lupus IV
     #shape_out = (2048, 2048)
     #shape_out = (300,200) # Serpens
     #shape_out = (300,256) # Chamaeleon
+    shape_out = (int(ds9_width), int(ds9_height))
     print("pixel size = {0}".format(pixsize))
     print("image size = {0} x {1} deg^2".format(
         shape_out[0]*pixsize, 
-        shape_out[1]*pixsize))
+        shape_out[1]*pixsize
+    ))
     #-------------------------------------------------
     # Show the first 10 rows as example.
     print("The shape of loaded map is {0}".format(DL07_paras.shape))
@@ -133,6 +144,15 @@ if __name__ == "__main__":
     #-------------------------------------------------
     # Cut a small piece from the map, taking LMC and SMC for example
     hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta)
+    # Rename the option file
+    new_name = 'healpix_{0}_{1}_{2}_option.txt'.format(frame, alpha, delta)
+    cmd_line = 'cp {0} {1}'.format( 
+        option_file_name,
+        new_name)
+    system(cmd_line)
+    print("The option file has been renamed from '{0}' to '{1}'".format(
+        option_file_name,
+        new_name))
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
