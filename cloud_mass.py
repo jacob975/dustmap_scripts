@@ -107,13 +107,16 @@ if __name__ == "__main__":
     aquila_distance = 300
     cepheus_distance = 300
     corona_australis_distance = 130
+    ic5146_distance = 950
+    musca_distance = 160
+    scorpius_distance = 130
     # Take one of above.
-    distance = corona_australis_distance 
+    distance = scorpius_distance 
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
-    levels = [2, 3, 4, 12] 
-    linewidths = [2, 1.5, 1.5, 1.5]
-    colors = ['k', 'k', 'r', 'b']
+    levels = [2, 3, 4, 5.5, 12] 
+    linewidths = [2, 1.5, 1.5, 1.5, 1.5]
+    colors = ['k', 'k', 'r', 'k', 'b']
     print("Av levels: \n{0}".format(levels))
     for level in levels:
         Av_mask = np.where(Av > level)
