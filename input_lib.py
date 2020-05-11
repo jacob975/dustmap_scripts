@@ -32,22 +32,28 @@ class inp_option():
 
 class option_hp_map_project(inp_option):
     def create(self):
-        s = [   
-            '# Coordinate system (icrs or galactic)',
-            'icrs',
-            '# Right Ascension (deg. in float)',
-            '# Example: 277',
-            '277',
-            '# Declination (deg. in float)',
-            '# Example: 0.5',
-            '0.5',
-            '# ds9 width (pixel in integer)',
-            '768',
-            '# ds9 height (pixel in integer)', 
-            '768',
-        ]
-        np.savetxt(self.default_name, s, fmt = '%s')
-
+        # Create the option file if it doesn't exist.
+        try:
+            np.loadtxt(self.default_name, dtype = str)
+        except:
+            s = [   
+                '# Coordinate system (icrs or galactic)',
+                'icrs',
+                '# Right Ascension (deg. in float)',
+                '# Example: 277',
+                '277',
+                '# Declination (deg. in float)',
+                '# Example: 0.5',
+                '0.5',
+                '# ds9 width (pixel in integer)',
+                '768',
+                '# ds9 height (pixel in integer)', 
+                '768',
+            ]
+            np.savetxt(self.default_name, s, fmt = '%s')
+            return
+        else:
+            return
 class option_calc_SF_paras(inp_option):
     def create(self):
         s = [

@@ -128,7 +128,7 @@ if __name__ == "__main__":
     #shape_out = (2048, 2048)
     #shape_out = (300,200) # Serpens
     #shape_out = (300,256) # Chamaeleon
-    shape_out = (int(ds9_width), int(ds9_height))
+    shape_out = (int(ds9_height), int(ds9_width))
     print("pixel size = {0}".format(pixsize))
     print("image size = {0} x {1} deg^2".format(
         shape_out[0]*pixsize, 

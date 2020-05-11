@@ -54,6 +54,9 @@ def calc_cloud_mass(col, mask, pix_area_deg2, distance_pc):
     mask_area_pc2 = pix_area_deg2 * (np.pi**2) / (180**2) * (distance_pc)**2 * len(selected_col)
     #-----------------------------------------------------------
     # Print the answer
+    if len(selected_col) == 0:
+        print("No data available under this threshold.")
+        return
     print("max selected_col: {0}".format(np.max(selected_col)))
     print("num of pixel: {0}".format(len(selected_col)))
     print("sum_col_M_kpc2: {0}".format(sum_col_M_kpc2))
@@ -96,17 +99,21 @@ if __name__ == "__main__":
     # c2d provides:
     perseus_distance = 250
     serpens_distance = 260
-    chamaeleon_distance = 178
+    chamaeleon_2_distance = 178
+    chamaeleon_13_distance = 200
     ophiuchus_distance = 125
     lupus_distance = 150
     lupus_3_distance = 200
+    aquila_distance = 300
+    cepheus_distance = 300
+    corona_australis_distance = 130
     # Take one of above.
-    distance = perseus_distance 
+    distance = corona_australis_distance 
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
-    levels = [2, 4, 12] 
-    linewidths = [2, 1.5, 1.5]
-    colors = ['k', 'r', 'b']
+    levels = [2, 3, 4, 12] 
+    linewidths = [2, 1.5, 1.5, 1.5]
+    colors = ['k', 'k', 'r', 'b']
     print("Av levels: \n{0}".format(levels))
     for level in levels:
         Av_mask = np.where(Av > level)
