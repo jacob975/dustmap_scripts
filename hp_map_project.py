@@ -57,7 +57,7 @@ def hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta):
     cut_data = hdu.data
     cut_w = WCS(hdu.header)
     fig = plt.subplot(111, projection = cut_w)
-    ax = plt.imshow(cut_data, vmax = 1e7)
+    ax = plt.imshow(cut_data)
     cbar = plt.colorbar(ax)
     cbar.set_label(hp_hdu.header['UNIT'], rotation=270, labelpad=15)
     plt.savefig("healpix_{0}_{1}_{2}.png".format(frame, alpha, delta))
