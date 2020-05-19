@@ -213,16 +213,19 @@ if __name__ == "__main__":
         IR4flux[:,1],
         MP1flux[:,1],
     ]))
-    # coordinate, Av
+    # coordinates, Av, and identities
     coord = np.transpose(np.array([inp_table[:,4], inp_table[:,5]]))
     fake_Av = np.ones((len(inp_table), 2))
+    fake_id = np.zeros((len(inp_table), 3))
+    fake_id[:,0] = 1
     #-----------------------------------
     # Save the data
     print ('Save the data')
     np.savetxt( '{0}_2MASS_SPITZER_sed.txt'.format(inp_table_name[:-4]), TWOMASS_SPITZER_flux_sed)
     np.savetxt( '{0}_sed.txt'.format(inp_table_name[:-4]), UKIDSS_SPITZER_flux_sed)
     np.savetxt( '{0}_coord.txt'.format(inp_table_name[:-4]), coord, fmt = '%s')
-    np.savetxt( '{0}_Av.txt'.format(inp_table_name[:-4]), fake_Av, header = '# fake')
+    np.savetxt( '{0}_Av.txt'.format(inp_table_name[:-4]), fake_Av, fmt = '%d', header = '# fake')
+    np.savetxt( '{0}_id.txt'.format(inp_table_name[:-4]), fake_id, fmt = '%d', header = '# fake')
     np.savetxt( '{0}_Q.txt'.format(inp_table_name[:-4]), quality_label, fmt = '%s')
     #-----------------------------------
     # Measure time
