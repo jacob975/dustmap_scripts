@@ -18,12 +18,12 @@ echo ${table_name} start
 extract_SEIP.py ${table_name}.tbl
 # Exclude or Mask bad data
 mask_ul.py ${table_name}_Q.txt ${table_name}_sed.txt
-exclud_XUS_678.py ${table_name}_Q.txt ${table_name}_sed.txt
-exclud_XUS_678.py ${table_name}_Q.txt ${table_name}_coord.txt
-exclud_XUS_678.py ${table_name}_Q.txt ${table_name}_Av.txt
-exclud_XUS_678.py ${table_name}_Q.txt ${table_name}_id.txt
-exclud_XUS_678.py ${table_name}_Q.txt ${table_name}_Q.txt
-exclud_XUS_678.py ${table_name}_Q.txt ${table_name}_2MASS_SPITZER_sed.txt
+exclude_XUS_678.py ${table_name}_Q.txt ${table_name}_sed.txt
+exclude_XUS_678.py ${table_name}_Q.txt ${table_name}_coord.txt
+exclude_XUS_678.py ${table_name}_Q.txt ${table_name}_Av.txt
+exclude_XUS_678.py ${table_name}_Q.txt ${table_name}_id.txt
+exclude_XUS_678.py ${table_name}_Q.txt ${table_name}_Q.txt
+exclude_XUS_678.py ${table_name}_Q.txt ${table_name}_2MASS_SPITZER_sed.txt
 # Rename the file to 20190522_SCAO format
 cp ${table_name}_sed_exXUS_678.txt source_sed_MaxLoss0.txt
 cp ${table_name}_coord_exXUS_678.txt source_coord_MaxLoss0.txt
