@@ -114,7 +114,7 @@ if __name__ == "__main__":
     distance = serpens_distance 
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
-    levels = [2, 4, 10, 12] 
+    levels = [2, 4, 9, 12] 
     linewidths = [2, 1.5, 1.5, 1.5]
     colors = ['k', 'r', 'k', 'b']
     print("Av levels: \n{0}".format(levels))
