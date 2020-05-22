@@ -124,3 +124,21 @@ def save2sql_mq_cloud(data):
     cursor.close()
     cnx.close()
 
+def load2py_mq_cloud(col_list):
+    # Connect to SQL
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    col_list_str = ', '.join(col_list)
+    cursor.execute(
+        "select {0} from {1}".format(
+            col_list_str,
+            mq_cloud_name,
+        )
+    )
+    data = cursor.fetchall()
+    data = np.array(data, dtype = str)
+    # Close the SQL
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return data
