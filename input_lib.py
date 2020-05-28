@@ -54,6 +54,32 @@ class option_hp_map_project(inp_option):
             return
         else:
             return
+
+class option_hp_cloud_pointer(inp_option):
+    def create(self):
+        # Create cloud coordinate table.
+        try:
+            np.loadtxt(self.default_name, dtype = str)
+        except:
+            s = [
+                '# Cloud coordinates, in icrs or galactic.',
+                '# Please list the cloud center below.',
+                '# Usage: [alpha] [beta] [frame]',
+                '# ex. 98.9 4.0 galactic',
+                '# It indicating a cloud located at (98.9, 4.0) using galactic coordinate',
+                '45.1 8.9 galactic',
+                '44.1 8.6 galactic',
+                '42.8 7.9 galactic',
+            ]
+            np.savetxt(self.default_name, s, fmt = '%s')
+            return
+        else:
+            return
+    def load(self, file_name):
+        self.opts = np.loadtxt(file_name, dtype = str)
+        self.opts = np.reshape(self.opts, (-1, 3))
+        return self.opts
+
 class option_calc_SF_paras(inp_option):
     def create(self):
         s = [

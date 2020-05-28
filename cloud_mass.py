@@ -96,27 +96,45 @@ if __name__ == "__main__":
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
     #--------------------------------------------
     # Given cloud distance
+    #--------------
     # c2d provides:
     perseus_distance = 250
+    # For Aquila, Serpens
     serpens_distance = 260
     chamaeleon_2_distance = 178
-    chamaeleon_13_distance = 200
     ophiuchus_distance = 125
     lupus_distance = 150
     lupus_3_distance = 200
-    aquila_distance = 300
+    #--------------
+    # Gould belt provides:
+    chamaeleon_13_distance = 200
+    auriga_distance = 300
     cepheus_distance = 300
     corona_australis_distance = 130
     ic5146_distance = 950
     musca_distance = 160
     scorpius_distance = 130
+    #--------------
+    # Zucker+20 provides:
+    ara_distance = 1055
+    cb28_distance = 398
+    cb29_distance = 374
+    cb34_distance = 1322
+    cma_ob1_distance = 1169
+    california_distance = 436
+    cam_distance = 235 # Camelopardalis
+    carina_distance = 2500
+    gem_ob1_distance = 1865
+    hercules_3_distance = 230
+    ic1396_distance = 916
+    ic2118_distance = 328
     # Take one of above.
-    distance = serpens_distance 
+    distance = ic2118_distance 
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
-    levels = [2, 4, 9, 12] 
-    linewidths = [2, 1.5, 1.5, 1.5]
-    colors = ['k', 'r', 'k', 'b']
+    levels = [2, 4, 9, 12, 18] 
+    linewidths = [2, 1.5, 1.5, 1.5, 1.5]
+    colors = ['k', 'r', 'k', 'b', 'k']
     print("Av levels: \n{0}".format(levels))
     for level in levels:
         Av_mask = np.where(Av > level)
