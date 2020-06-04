@@ -24,6 +24,7 @@ update log
 '''
 import time
 import matplotlib.pyplot as plt
+from  matplotlib.colors import LogNorm
 import numpy as np
 import healpy as hp
 from sys import argv
@@ -64,7 +65,13 @@ def hp_project_script(hp_hdu, cnt_coord, cloud_ra_list, cloud_dec_list, shape_ou
     fig = plt.figure(figsize = (6,6))
     ax = fig.add_axes([0.09, 0.16, 0.84, 0.70], projection = cut_w)
     #ax = plt.subplot(111, projection = cut_w) 
-    img = plt.imshow(cut_data)
+    img = plt.imshow(
+        cut_data,
+        norm = LogNorm(
+            vmax = np.max(cut_data),
+            vmin = np.min(cut_data)
+        )
+    )
     ax.set_xlabel('Galactic longitude')
     ax.set_ylabel('Galactic latitude')
     plt.grid(color='white', ls='solid')
@@ -84,7 +91,6 @@ def hp_project_script(hp_hdu, cnt_coord, cloud_ra_list, cloud_dec_list, shape_ou
     # Set colorbar.
     cbar_ax = fig.add_axes([0.09, 0.06, 0.84, 0.02])
     cbar = plt.colorbar(img, cax = cbar_ax, orientation="horizontal")
-    #cbar.set_label(hp_hdu.header['UNIT'], rotation=270, labelpad=15)
     cbar.set_label(hp_hdu.header['UNIT'], labelpad=15)
     plt.savefig("healpix_{0}.png".format(cloud_name))
     hdu.writeto("healpix_{0}.fits".format(cloud_name), overwrite = True)
@@ -169,7 +175,7 @@ if __name__ == "__main__":
     offset_array = np.array(offset_list, dtype = float)
     max_offset = np.amax(offset_array)
     print(max_offset)
-    size_pix_num = 2 * max_offset/pixsize + 30
+    size_pix_num = 2 * max_offset/pixsize + 100 
     #shape_out = (int(ds9_height), int(ds9_width))
     shape_out = (int(size_pix_num), int(size_pix_num))
     # Print the size information

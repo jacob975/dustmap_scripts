@@ -106,6 +106,7 @@ mq_cloud_format = np.array([
     # Input files and Assumptions
     ['`input_file`', 'VARCHAR(100)'],
     ['`reference`', 'VARCHAR(100)'],
+    ['`comments`', 'VARCHAR(200)'],
 ])
 
 def save2sql_mq_cloud(data):

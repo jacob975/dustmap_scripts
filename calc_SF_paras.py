@@ -61,6 +61,7 @@ if __name__ == "__main__":
     avg_cloud_distance = float(data_list[6])    # kpc
     avg_cloud_age = float(data_list[7]) # Myr
     Av_threshold = float(data_list[8]) # mag
+    comments = data_list[9]
     #--------------------------------------------
     # Calculate the Star Formation parameters.
     # Side results, required to obtain main results.
@@ -151,6 +152,7 @@ if __name__ == "__main__":
     data[mq_cloud_format_keys.index('`sfe`')] = sfe 
     data[mq_cloud_format_keys.index('`input_file`')] = data_name 
     data[mq_cloud_format_keys.index('`reference`')] = 'Chiu, Yi-Lung' 
+    data[mq_cloud_format_keys.index('`comments`')] = comments
     save2sql_mq_cloud(data)
     #-----------------------------------
     # Measure time

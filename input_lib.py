@@ -107,5 +107,10 @@ class option_calc_SF_paras(inp_option):
             "2",
             "# Av threshold used to defined the cloud region (mag)",
             "4",
+            "#----------------------------------------",
+            "# Comments",
+            "#----------------------------------------",
+            "# Write note below but ONE line only.",
+            "NULL",
         ]
         np.savetxt(self.default_name, s, fmt = '%s')
