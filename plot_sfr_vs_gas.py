@@ -49,12 +49,23 @@ if __name__ == "__main__":
     # Obtain data from SQL
     data = load2py_mq_cloud(col_list)
     data = np.array(data, dtype=float)
-    gas_sigma = data[:,0]
-    sfr_sigma = data[:,1]
+    gas_sigma_c2d_gould_belt = data[:20,0]
+    sfr_sigma_c2d_gould_belt = data[:20,1]
+    gas_sigma_others = data[20:,0]
+    sfr_sigma_others = data[20:,1]
     #--------------------------------------------
     # Plot the figure
     fig, ax = plt.subplots(figsize = (8,8))
-    ax.scatter(gas_sigma, sfr_sigma, label='My works (c2d, Gould belt)')
+    ax.scatter(
+        gas_sigma_c2d_gould_belt, 
+        sfr_sigma_c2d_gould_belt, 
+        label='My works (clouds from c2d, Gould belt)'
+    )
+    ax.scatter(
+        gas_sigma_others, 
+        sfr_sigma_others, 
+        label='My works (clouds from Zucker+20)'
+    )
     #--------------------------------------------
     # Additional data
     #-------------
@@ -84,7 +95,10 @@ if __name__ == "__main__":
     ], dtype = object)
     Heiderman_gas_sigma = np.array(Heiderman_cloud[:,1], dtype = float)
     Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,2], dtype = float)
-    ax.scatter(Heiderman_gas_sigma, Heiderman_sfr_sigma, label = 'Heiderman+10 (c2d, Gould belt)')
+    ax.scatter(
+        Heiderman_gas_sigma, 
+        Heiderman_sfr_sigma, 
+        label = 'Heiderman+10 (c2d, Gould belt)')
     #-------------
     # Kennicutt+98
     # K-S relation
@@ -93,14 +107,19 @@ if __name__ == "__main__":
         # sfr_sigma in Msun / Myr pc^2
         sfr_sigma = 2.5e-4 * np.power(gas_sigma, 1.4)
         return sfr_sigma
-    KS_gas_sigma = np.logspace(0, 3, 100)
+    KS_gas_sigma = np.logspace(1, 3, 100)
     KS_sfr_sigma = Kennicut98_sfr_sigma(KS_gas_sigma)
-    ax.plot(KS_gas_sigma, KS_sfr_sigma, label = 'Kennicut+98 ( KS relation)')
+    ax.plot(
+        KS_gas_sigma, 
+        KS_sfr_sigma, 
+        color = 'k', 
+        label = 'Kennicut+98 ( KS relation)'
+    )
     #-----------------------------------
     # Adjust and Save the figure
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_xlim(1e0, 1e3)
+    #ax.set_xlim(1e0, 1e3)
     ax.set_ylim(1e-2, 1e1)
     ax.grid(True)
     ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
