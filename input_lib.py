@@ -82,35 +82,65 @@ class option_hp_cloud_pointer(inp_option):
 
 class option_calc_SF_paras(inp_option):
     def create(self):
-        s = [
-            "# Region name, take Perseus as example",
-            "Perseus",
-            "#----------------------------------------",
-            "# YSO part",
-            "#----------------------------------------",
-            "# Number of YSOs",
-            "118",
-            "# Average YSO age (Myr)",
-            "2",
-            "# Average YSO mass (Msun)",
-            "0.5",
-            "#----------------------------------------",
-            "# Cloud part",
-            "#----------------------------------------",
-            "# Cloud mass (gas+dust in Msun)",
-            "17793",
-            "# Cloud size (solid angle in deg^2)",
-            "3.97",
-            "# Distance to the cloud (pc)",
-            "250",
-            "# Average cloud age (Myr) (not used)",
-            "2",
-            "# Av threshold used to defined the cloud region (mag)",
-            "4",
-            "#----------------------------------------",
-            "# Comments",
-            "#----------------------------------------",
-            "# Write note below but ONE line only.",
-            "NULL",
-        ]
-        np.savetxt(self.default_name, s, fmt = '%s')
+        # Create the option file if it doesn't exist.
+        try:
+            np.loadtxt(self.default_name, dtype = str)
+        except:
+            s = [
+                "# Region name, take Perseus as example",
+                "Perseus",
+                "#----------------------------------------",
+                "# YSO part",
+                "#----------------------------------------",
+                "# Number of YSOs",
+                "118",
+                "# Average YSO age (Myr)",
+                "2",
+                "# Average YSO mass (Msun)",
+                "0.5",
+                "#----------------------------------------",
+                "# Cloud part",
+                "#----------------------------------------",
+                "# Cloud mass (gas+dust in Msun)",
+                "17793",
+                "# Cloud size (solid angle in deg^2)",
+                "3.97",
+                "# Distance to the cloud (pc)",
+                "250",
+                "# Average cloud age (Myr) (not used)",
+                "2",
+                "# Av threshold used to defined the cloud region (mag)",
+                "4",
+                "#----------------------------------------",
+                "# Comments",
+                "#----------------------------------------",
+                "# Write note below but ONE line only.",
+                "NULL",
+            ]
+            np.savetxt(self.default_name, s, fmt = '%s')
+            return
+        else:
+            return
+
+class option_Av_region_paras(inp_option):
+    def create(self):
+        # Create the option file if it doesn't exist.
+        try:
+            np.loadtxt(self.default_name, dtype = str)
+        except:
+            s = [
+                "# The Av list used to define contours from little to large."
+                "# ex. : 2 4 6 12 22",
+                "2   4   6  12  22",
+                "# The contour linewidth",
+                "2 1.5 1.5 1.5 1.5",
+                "# The contour colors",
+                "k   r   k   b   k",
+            ]
+            np.savetxt(self.default_name, s, fmt = '%s')
+            return
+        else:
+            return
+    def load(self, file_name):
+        self.opts = np.loadtxt(file_name, dtype = str)
+        return self.opts

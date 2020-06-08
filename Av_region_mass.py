@@ -3,7 +3,7 @@
 Abstract:
     This is a program to calculate the cloud mass based on column density map and extintion map.
 Usage:
-    cloud_mass.py [column density map] [extinction map]
+    Av_region_mass.py [contour config] [column density map] [extinction map]
     column density map unit: M_sun / kpc^2
     extinction map unit: Av in mag
 Output:
@@ -17,10 +17,10 @@ Editor:
 #   This code is made in python3 #
 ##################################
 
-20200409
+20200608
 ####################################
 update log
-20200409 version alpha 1:
+20200608 version alpha 1:
     1. The code works.
 '''
 # First, we’ll import the necessary modules:
@@ -37,15 +37,24 @@ from astropy.wcs.utils import proj_plane_pixel_area
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
+from input_lib import option_Av_region_paras
+import dist_lib 
+
+class cloud_mass_set():
+    def __init__(self):
+        self.distance_pc = 0.0 
+        self.mask_area_deg2 = 0.0 
+        self.mask_area_pc2 = 0.0 
+        self.dust_mass_Msun = 0.0
+
 def calc_cloud_mass(col, mask, pix_area_deg2, distance_pc):
     # distance in pc
-    print("---")
     selected_col = col[mask]
     sum_col_M_kpc2 = np.sum(selected_col)
     # Trial 1
     sum_col_M_sr = sum_col_M_kpc2 * (distance_pc/1000)**2
     sum_col_M_deg2 = sum_col_M_sr * (np.pi**2) / (180**2)
-    cloud_dust_mass = sum_col_M_deg2 * pix_area_deg2
+    dust_mass_Msun = sum_col_M_deg2 * pix_area_deg2
     # Trial 2
     pix_area_sr = pix_area_deg2 * (np.pi**2) / (180**2)
     pix_area_kpc2 = pix_area_sr * (distance_pc/1000)**2
@@ -53,18 +62,20 @@ def calc_cloud_mass(col, mask, pix_area_deg2, distance_pc):
     # Not related
     mask_area_pc2 = pix_area_deg2 * (np.pi**2) / (180**2) * (distance_pc)**2 * len(selected_col)
     #-----------------------------------------------------------
-    # Print the answer
+    # Save the answer
     if len(selected_col) == 0:
         print("No data available under this threshold.")
-        return
-    print("max selected_col: {0}".format(np.max(selected_col)))
-    print("num of pixel: {0}".format(len(selected_col)))
-    print("sum_col_M_kpc2: {0}".format(sum_col_M_kpc2))
-    print("pix_area_deg2: {0}".format(pix_area_deg2))
-    print("mask_area_deg2: {0}".format(pix_area_deg2 * len(selected_col)))
-    print("mask_area_pc2: {0}".format(mask_area_pc2))
-    print("dust mass: {0} M_sun".format(cloud_dust_mass))
-    return
+        return True, None 
+    max_selected_col = np.max(selected_col)
+    num_of_pixel = len(selected_col)
+    mask_area_deg2 = pix_area_deg2 * len(selected_col)
+    
+    ans = cloud_mass_set()
+    ans.distance_pc = distance_pc,
+    ans.mask_area_deg2 = mask_area_deg2,
+    ans.mask_area_pc2 = mask_area_pc2,
+    ans.dust_mass_Msun = dust_mass_Msun,
+    return False, ans
 
 #--------------------------------------------
 # Main code
@@ -72,13 +83,20 @@ if __name__ == "__main__":
     # Measure time
     start_time = time.time()
     #-----------------------------------
+    # Initialize the arguments
+    default_contour_config_name = "contour_config.txt"
+    # aa stands for Arguement Assistent
+    aa = option_Av_region_paras(default_contour_config_name)
+    #-----------------------------------
     # Load argv
-    if len(argv) != 3:
+    if len(argv) != 4:
         print ("The number of arguments is wrong.")
-        print ("Usage: cloud_mass.py [column density] [extinction map]" )
+        print ("Usage:  Av_region_mass.py [contour config] [column density map] [extinction map]") 
+        aa.create()
         exit()
-    col_den_name = argv[1]
-    Av_name = argv[2]
+    contour_config_name = argv[1]
+    col_den_name = argv[2]
+    Av_name = argv[3]
     print("Arguments:\n{0}".format(argv))
     #--------------------------------------------
     # Load image
@@ -91,93 +109,59 @@ if __name__ == "__main__":
     h_Av = hdu_Av[1].header 
     w_Av = WCS(h_Av)
     #--------------------------------------------
-    # Initialize the parameters
+    # Initialize the image parameters
+    # Contours
+    contour_config = aa.load(contour_config_name)
+    levels = np.array(contour_config[0], dtype = float)[::-1]
+    linewidths = np.array(contour_config[1], dtype = float)[::-1]
+    colors = contour_config[2, ::-1]
+    print("Av levels: \n{0}".format(levels))
+    print("linewidth: \n{0}".format(linewidths))
+    print("colors: \n{0}".format(colors))
+    # Pixel Size
     pix_area_in_deg2_col = abs(h_col['CDELT1'] * h_col['CDELT2']) 
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
     #--------------------------------------------
     # Given cloud distance
-    #--------------
-    # c2d provides:
-    perseus_distance = 250
-    # For Aquila, Serpens
-    serpens_distance = 260
-    chamaeleon_2_distance = 178
-    ophiuchus_distance = 125
-    lupus_distance = 150
-    lupus_3_distance = 200
-    #--------------
-    # Gould belt provides:
-    chamaeleon_13_distance = 200
-    auriga_distance = 300
-    cepheus_distance = 300
-    corona_australis_distance = 130
-    ic5146_distance = 950
-    musca_distance = 160
-    scorpius_distance = 130
-    #--------------
-    # Zucker+20 provides:
-    ara_distance = 1055
-    cb28_distance = 398
-    cb29_distance = 374
-    cb34_distance = 1322
-    cma_ob1_distance = 1169
-    california_distance = 436
-    cam_distance = 235 # Camelopardalis
-    carina_distance = 2500
-    gem_ob1_distance = 1865
-    hercules_3_distance = 230
-    ic1396_distance = 916
-    ic2118_distance = 328
-    l1228_distance = 366 
-    l1228d_distance = 491
-    l1251_distance = 351
-    l1293_distance = 1083
-    l1306_2_distance = 941
-    l1307_2_distance = 902
-    l1333_distance = 283
-    l1335_distance = 647
-    l1340_distance = 858
-    l1355_distance = 948
-    l1617_distance = 414
-    l1622_distance = 418
-    l291_distance = 1439
-    l977_distance = 660
-    l988_distance = 627
-    lbn906_distance = 287
-    lagoon_distance = 1325
-    m17_distance = 1488
-    m20_distance = 1253
-    maddalena_distance = 2110
-    ngc2264_distance = 771
-    mon_r2_136_distance = 799
-    ngc2362_distance = 1173
-    ngc6604_distance = 1352
-    north_america_distance = 834
-    orion_distance = 433
-    orion_lam_distance = 406
-    pegasus_234_distance = 238
-    pipe_distance = 180
-    rcw38_distance = 1595
-    rosette_distance = 1356
-    s106_distance = 1091
-    sh2_231_232_distance = 1616
-    taurus_distance = 147
-    w3_distance = 1873
-    w5_distance = 2026
-    cygnus_x_distance = 1272
-    # Take one of above.
-    distance = perseus_distance 
+    distance = dist_lib.perseus_distance 
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
-    levels = [2, 4, 6, 12, 22] 
-    linewidths = [2, 1.5, 1.5, 1.5, 1.5]
-    colors = ['k', 'r', 'k', 'b', 'k']
-    print("Av levels: \n{0}".format(levels))
+    prev_level = None
+    prev_result_set = cloud_mass_set()
+    the_first = True
     for level in levels:
+        # Renew the results
+        new_result_set = None 
         Av_mask = np.where(Av > level)
-        calc_cloud_mass(col, Av_mask, pix_area_in_deg2_col, distance)
+        Failure, new_result_set = calc_cloud_mass(col, Av_mask, pix_area_in_deg2_col, distance)
+        if Failure:
+            continue
+        elif the_first:
+            the_first = False
+            print("-------------------------------")
+            print("Av > {0}".format(level))
+            print("mask_area_deg2: {0}".format(new_result_set.mask_area_deg2[0]))
+            print("mask_area_pc2: {0}".format(new_result_set.mask_area_pc2[0]))
+            print("dust mass: {0} M_sun".format(new_result_set.dust_mass_Msun[0]))
+        else:
+            print("-------------------------------")
+            print("{0} < Av <= {1} ".format(level, prev_level))
+            print("mask_area_deg2: {0}".format(
+                new_result_set.mask_area_deg2[0] - prev_result_set.mask_area_deg2[0]))
+            print("mask_area_pc2: {0}".format(
+                new_result_set.mask_area_pc2[0] - prev_result_set.mask_area_pc2[0]))
+            print("dust_mass_Msun: {0}".format(
+                new_result_set.dust_mass_Msun[0] - prev_result_set.dust_mass_Msun[0]))
+            
+        # Update the last result by this result
+        prev_level = level
+        prev_result_set = new_result_set 
+            
     #--------------------------------------------
     # Plot the contour
+    levels = levels[::-1]
+    linewidths = linewidths[::-1]
+    colors = colors[::-1]
     plt.figure(figsize=(10,8))
     axes = plt.subplot(111, projection = w_col)
     ax = plt.imshow(
