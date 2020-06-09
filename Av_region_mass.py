@@ -109,7 +109,7 @@ if __name__ == "__main__":
     h_Av = hdu_Av[1].header 
     w_Av = WCS(h_Av)
     #--------------------------------------------
-    # Initialize the image parameters
+    # Initialize parameters
     # Contours
     contour_config = aa.load(contour_config_name)
     levels = np.array(contour_config[0], dtype = float)[::-1]
@@ -121,6 +121,8 @@ if __name__ == "__main__":
     # Pixel Size
     pix_area_in_deg2_col = abs(h_col['CDELT1'] * h_col['CDELT2']) 
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
+    # Result hosts
+    result_table = np.zeros((len(levels), 4), dtype = object)
     #--------------------------------------------
     # Given cloud distance
     distance = dist_lib.perseus_distance 
@@ -129,7 +131,7 @@ if __name__ == "__main__":
     prev_level = None
     prev_result_set = cloud_mass_set()
     the_first = True
-    for level in levels:
+    for i, level in enumerate(levels):
         # Renew the results
         new_result_set = None 
         Av_mask = np.where(Av > level)
@@ -139,24 +141,33 @@ if __name__ == "__main__":
         elif the_first:
             the_first = False
             print("-------------------------------")
-            print("Av > {0}".format(level))
-            print("mask_area_deg2: {0}".format(new_result_set.mask_area_deg2[0]))
-            print("mask_area_pc2: {0}".format(new_result_set.mask_area_pc2[0]))
-            print("dust mass: {0} M_sun".format(new_result_set.dust_mass_Msun[0]))
+            Av_range = "Av > {0}".format(level)
+            mask_area_deg2 = new_result_set.mask_area_deg2[0]
+            mask_area_pc2 = new_result_set.mask_area_pc2[0]
+            dust_mass_Msun = new_result_set.dust_mass_Msun[0]
         else:
             print("-------------------------------")
-            print("{0} < Av <= {1} ".format(level, prev_level))
-            print("mask_area_deg2: {0}".format(
-                new_result_set.mask_area_deg2[0] - prev_result_set.mask_area_deg2[0]))
-            print("mask_area_pc2: {0}".format(
-                new_result_set.mask_area_pc2[0] - prev_result_set.mask_area_pc2[0]))
-            print("dust_mass_Msun: {0}".format(
-                new_result_set.dust_mass_Msun[0] - prev_result_set.dust_mass_Msun[0]))
+            Av_range = "{0} < Av <= {1} ".format(level, prev_level) 
+            mask_area_deg2 = new_result_set.mask_area_deg2[0] - prev_result_set.mask_area_deg2[0]
+            mask_area_pc2 =  new_result_set.mask_area_pc2[0] - prev_result_set.mask_area_pc2[0]
+            dust_mass_Msun = new_result_set.dust_mass_Msun[0] - prev_result_set.dust_mass_Msun[0]
+        result_table[i, 0] = Av_range
+        result_table[i, 1] = mask_area_deg2
+        result_table[i, 2] = mask_area_pc2
+        result_table[i, 3] = dust_mass_Msun
+        print(Av_range)
+        print("mask_area_deg2: {0}".format(mask_area_deg2))
+        print("mask_area_pc2: {0}".format(mask_area_pc2))
+        print("dust_mass_Msun: {0}".format(dust_mass_Msun))
             
         # Update the last result by this result
         prev_level = level
         prev_result_set = new_result_set 
             
+    #--------------------------------------------
+    # Save the result
+    print(result_table)
+    np.save("Av_range_mass", result_table) 
     #--------------------------------------------
     # Plot the contour
     levels = levels[::-1]
