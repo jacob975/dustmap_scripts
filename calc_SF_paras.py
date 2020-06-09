@@ -60,7 +60,7 @@ if __name__ == "__main__":
     cloud_area_deg2 = float(data_list[5])   # deg^2
     avg_cloud_distance = float(data_list[6])    # kpc
     avg_cloud_age = float(data_list[7]) # Myr
-    Av_threshold = float(data_list[8]) # mag
+    Av_threshold = data_list[8] # mag
     comments = data_list[9]
     #--------------------------------------------
     # Calculate the Star Formation parameters.

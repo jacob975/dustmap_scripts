@@ -122,15 +122,20 @@ if __name__ == "__main__":
     pix_area_in_deg2_col = abs(h_col['CDELT1'] * h_col['CDELT2']) 
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
     # Result hosts
+    # Av_range, mask_area_deg2, mask_area_pc2, dust_mass_Msun
     result_table = np.zeros((len(levels), 4), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    distance = dist_lib.perseus_distance 
+    distance = dist_lib.ophiuchus_distance 
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
     prev_level = None
     prev_result_set = cloud_mass_set()
     the_first = True
+    Av_range = None
+    mask_area_deg2 = None
+    mask_area_pc2 = None
+    dust_mass_Msun = None
     for i, level in enumerate(levels):
         # Renew the results
         new_result_set = None 
@@ -167,7 +172,7 @@ if __name__ == "__main__":
     #--------------------------------------------
     # Save the result
     print(result_table)
-    np.save("Av_range_mass", result_table) 
+    np.save("Av_region_mass", result_table) 
     #--------------------------------------------
     # Plot the contour
     levels = levels[::-1]

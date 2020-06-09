@@ -81,43 +81,49 @@ class option_hp_cloud_pointer(inp_option):
         return self.opts
 
 class option_calc_SF_paras(inp_option):
+    def load(self, file_name):
+        self.opts = np.loadtxt(file_name, dtype = str, delimiter = '\n')
+        self.opts = list(self.opts)
+        return self.opts
+    def show_string(self):
+        self.s = [
+            "# Region name, take Perseus as example",
+            "Perseus",
+            "#----------------------------------------",
+            "# YSO part",
+            "#----------------------------------------",
+            "# Number of YSOs",
+            "118",
+            "# Average YSO age (Myr)",
+            "2",
+            "# Average YSO mass (Msun)",
+            "0.5",
+            "#----------------------------------------",
+            "# Cloud part",
+            "#----------------------------------------",
+            "# Cloud mass (gas+dust in Msun)",
+            "17793",
+            "# Cloud size (solid angle in deg^2)",
+            "3.97",
+            "# Distance to the cloud (pc)",
+            "250",
+            "# Average cloud age (Myr) (not used)",
+            "2",
+            "# Av threshold used to defined the cloud region (mag)",
+            "4",
+            "#----------------------------------------",
+            "# Comments",
+            "#----------------------------------------",
+            "# Write note below but ONE line only.",
+            "NULL",
+        ]
     def create(self):
         # Create the option file if it doesn't exist.
         try:
             np.loadtxt(self.default_name, dtype = str)
         except:
-            s = [
-                "# Region name, take Perseus as example",
-                "Perseus",
-                "#----------------------------------------",
-                "# YSO part",
-                "#----------------------------------------",
-                "# Number of YSOs",
-                "118",
-                "# Average YSO age (Myr)",
-                "2",
-                "# Average YSO mass (Msun)",
-                "0.5",
-                "#----------------------------------------",
-                "# Cloud part",
-                "#----------------------------------------",
-                "# Cloud mass (gas+dust in Msun)",
-                "17793",
-                "# Cloud size (solid angle in deg^2)",
-                "3.97",
-                "# Distance to the cloud (pc)",
-                "250",
-                "# Average cloud age (Myr) (not used)",
-                "2",
-                "# Av threshold used to defined the cloud region (mag)",
-                "4",
-                "#----------------------------------------",
-                "# Comments",
-                "#----------------------------------------",
-                "# Write note below but ONE line only.",
-                "NULL",
-            ]
-            np.savetxt(self.default_name, s, fmt = '%s')
+            self.show_string()
+            np.savetxt(self.default_name, self.s, fmt = '%s')
             return
         else:
             return

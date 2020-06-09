@@ -65,18 +65,22 @@ if __name__ == "__main__":
     aa = option_Av_region_paras(default_contour_config_name)
     #-----------------------------------
     # Load argv
-    if len(argv) != 4:
+    if len(argv) != 5:
         print ("The number of arguments is wrong.")
-        print ("Usage: Av_region_YSO.py [contour config] [YSO coord] [extinction map]") 
+        print ("Usage: Av_region_YSO.py [contour config] [coord] [cls_pred] [extinction map]") 
         aa.create()
         exit()
     contour_config_name = argv[1]
-    yso_coord_name = argv[2]
-    Av_name = argv[3]
+    coord_name = argv[2]
+    cls_pred_name = argv[3]
+    Av_name = argv[4]
     print("Arguments:\n{0}".format(argv))
     #--------------------------------------------
     # Load data and image
-    yso_coord = np.loadtxt(yso_coord_name, dtype = float)
+    coord_array = np.loadtxt(coord_name, dtype = float)
+    cls_pred = np.loadtxt(cls_pred_name, dtype = int)
+    yso_index = np.where(cls_pred == 2)[0]
+    yso_coord = coord_array[yso_index]
     hdu_Av = fits.open(Av_name)
     Av = hdu_Av[1].data 
     h_Av = hdu_Av[1].header 
@@ -93,6 +97,7 @@ if __name__ == "__main__":
     print("linewidth: \n{0}".format(linewidths))
     print("colors: \n{0}".format(colors))
     # Result hosts
+    # Av_range, yso_num_range
     result_table = np.zeros((len(levels), 2), dtype = object)
     #--------------------------------------------
     # Calculate the number of YSO in certain Av range 
@@ -132,7 +137,7 @@ if __name__ == "__main__":
     #--------------------------------------------
     # Save the result
     print(result_table)
-    np.save("Av_range_YSO", result_table) 
+    np.save("Av_region_YSO", result_table) 
     #--------------------------------------------
     # Plot the contour
     levels = levels[::-1]
