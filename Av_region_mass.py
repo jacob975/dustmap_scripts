@@ -123,10 +123,10 @@ if __name__ == "__main__":
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
     # Result hosts
     # Av_range, mask_area_deg2, mask_area_pc2, dust_mass_Msun
-    result_table = np.zeros((len(levels), 4), dtype = object)
+    result_table = np.zeros((len(levels), 5), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    distance = dist_lib.ophiuchus_distance 
+    distance = dist_lib.serpens_distance
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
     prev_level = None
@@ -160,6 +160,7 @@ if __name__ == "__main__":
         result_table[i, 1] = mask_area_deg2
         result_table[i, 2] = mask_area_pc2
         result_table[i, 3] = dust_mass_Msun
+        result_table[i, 4] = distance
         print(Av_range)
         print("mask_area_deg2: {0}".format(mask_area_deg2))
         print("mask_area_pc2: {0}".format(mask_area_pc2))

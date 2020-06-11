@@ -166,12 +166,12 @@ if __name__ == "__main__":
     w5_distance = 2026
     cygnus_x_distance = 1272
     # Take one of above.
-    distance = perseus_distance 
+    distance = serpens_distance 
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
-    levels = [2, 4, 6, 12, 22] 
-    linewidths = [2, 1.5, 1.5, 1.5, 1.5]
-    colors = ['k', 'r', 'k', 'b', 'k']
+    levels = [2, 4, 6, 9, 12, 22] 
+    linewidths = [2, 1.5, 1.5, 1.5, 1.5, 1.5]
+    colors = ['k', 'r', 'k', 'k', 'b', 'k']
     print("Av levels: \n{0}".format(levels))
     for level in levels:
         Av_mask = np.where(Av > level)

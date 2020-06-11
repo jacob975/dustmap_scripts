@@ -96,8 +96,19 @@ mq_cloud_format = np.array([
     # Star Formation Rate (SFR)
     ['`sfr_Msun_per_Myr`', ' FLOAT'],
     ['`e_sfr_Msun_per_Myr`', ' FLOAT'],
+    # Star Formation Rate density (All YSO)
     ['`sfr_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],
     ['`e_sfr_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],
+    ['`flag_sfr_surface_density_Msun_per_Myr_pc2`', 'VARCHAR(4)'],
+    # Star Formation Rate density (Class I only)
+    ['`sfr_I_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],
+    ['`e_sfr_I_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],
+    ['`flag_sfr_I_surface_density_Msun_per_Myr_pc2`', 'VARCHAR(4)'],
+    # Star Formation Rate density (Class F only)
+    ['`sfr_F_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],
+    ['`e_sfr_F_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],
+    ['`flag_sfr_F_surface_density_Msun_per_Myr_pc2`', 'VARCHAR(4)'],
+    # Depletion time
     ['`cloud_depletion_time_Myr`', ' FLOAT'],
     ['`cloud_free_fall_time_Myr`', ' FLOAT'],
     ['`sfr_per_t_ff`', ' FLOAT'],

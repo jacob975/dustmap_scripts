@@ -49,23 +49,34 @@ if __name__ == "__main__":
     # Obtain data from SQL
     data = load2py_mq_cloud(col_list)
     data = np.array(data, dtype=float)
+    # Each single cloud from c2d and Gould belt
     gas_sigma_c2d_gould_belt = data[:20,0]
     sfr_sigma_c2d_gould_belt = data[:20,1]
+    # Each single cloud from Zucker+20
     gas_sigma_others = data[20:52,0]
     sfr_sigma_others = data[20:52,1]
+    # Av regions
+    gas_sigma_Av_regions = data[52:,0]
+    sfr_sigma_Av_regions = data[52:,1]
     #--------------------------------------------
     # Plot the figure
     fig, ax = plt.subplots(figsize = (8,8))
+    #ax.scatter(
+    #    gas_sigma_c2d_gould_belt, 
+    #    sfr_sigma_c2d_gould_belt, 
+    #    label='My works (clouds from c2d, Gould belt)'
+    #)
+    #ax.scatter(
+    #    gas_sigma_others, 
+    #    sfr_sigma_others, 
+    #    label='My works (clouds from Zucker+20)'
+    #)
     ax.scatter(
-        gas_sigma_c2d_gould_belt, 
-        sfr_sigma_c2d_gould_belt, 
-        label='My works (clouds from c2d, Gould belt)'
+        gas_sigma_Av_regions,
+        sfr_sigma_Av_regions,
+        label='My works (c2d Av regions)'
     )
-    ax.scatter(
-        gas_sigma_others, 
-        sfr_sigma_others, 
-        label='My works (clouds from Zucker+20)'
-    )
+        
     #--------------------------------------------
     # Additional data
     #-------------
@@ -93,12 +104,45 @@ if __name__ == "__main__":
         [ 'Sco     ', 85.2, 0.343],
         [ 'Ser-Aqu ', 136 , 2.01],
     ], dtype = object)
-    Heiderman_gas_sigma = np.array(Heiderman_cloud[:,1], dtype = float)
-    Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,2], dtype = float)
+    Heiderman_Av_regions_class_f = np.array([
+    # Cloud, gas_sigma, sfr_sigma
+        ['Cha II 1', 53.6, 0.18],
+        ['Cha II 2', 92.6, 0.795],
+        ['Cha II 3', 147, 4.68],
+        ['Cha II 4', 193, 19.3],
+        ['Lup I 1 ', 51.9, 0.174],
+        ['Lup I 2', 109, 1.97],
+        ['Lup I 3', 185, 15.0],
+        ['Lup III 1', 54.8, 0.188],
+        ['Lup III 2', 153, 3.29],
+        ['Lup III 3', 248, 11.1],
+        ['Lup IV 1', 61.5, 0.619],
+        ['Lup IV 2', 157, 8.43],
+        ['Lup IV 3', 267, 15.4],
+        ['Oph 1', 87.2, 0.105],
+        ['Oph 2', 198, 2.26],
+        ['Oph 3', 319, 12.1],
+        ['Oph 4', 435, 57.4],
+        ['Oph 5', 542, 96.0],
+        ['Per 1', 66.9, 0.0268],
+        ['Per 2', 122, 0.364],
+        ['Per 3', 194, 5.12],
+        ['Per 4', 261, 10.3],
+        ['Per 5', 317, 6.36],
+        ['Per 6', 404, 78.7],
+        ['Ser 1', 120, 0.105],
+        ['Ser 2', 180, 1.10],
+        ['Ser 3', 243, 7.57],
+        ['Ser 4', 307, 54.8],
+    ], dtype = object)
+    #Heiderman_gas_sigma = np.array(Heiderman_cloud[:,1], dtype = float)
+    #Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,2], dtype = float)
+    Heiderman_gas_sigma = np.array(Heiderman_Av_regions_class_f[:,1], dtype = float)
+    Heiderman_sfr_sigma = np.array(Heiderman_Av_regions_class_f[:,2], dtype = float)
     ax.scatter(
         Heiderman_gas_sigma, 
         Heiderman_sfr_sigma, 
-        label = 'Heiderman+10 (c2d, Gould belt)')
+        label = 'Heiderman+10 (c2d Av regions)')
     #-------------
     # Kennicutt+98
     # K-S relation
@@ -125,7 +169,7 @@ if __name__ == "__main__":
     ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
     ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr pc^{2}$)')
     ax.legend()
-    fig.savefig("chiu20_sfr_vs_gas.png")
+    fig.savefig("chiu20_sfr_vs_gas_Av_regions.png")
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

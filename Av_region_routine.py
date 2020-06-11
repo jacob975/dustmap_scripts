@@ -79,7 +79,7 @@ if __name__ == "__main__":
         string_array[10] = avg_yso_mass
         string_array[15] = float(Av_region_mass[i, 3]) * 100
         string_array[17] = Av_region_mass[i, 1]
-        string_array[19] = avg_cloud_distance
+        string_array[19] = Av_region_mass[i, 4] 
         string_array[21] = avg_cloud_age
         string_array[23] = Av_region_yso[i,0]
         string_array[28] = comments

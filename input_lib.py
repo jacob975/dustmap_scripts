@@ -137,11 +137,11 @@ class option_Av_region_paras(inp_option):
             s = [
                 "# The Av list used to define contours from little to large."
                 "# ex. : 2 4 6 12 22",
-                "2   4   6  12  22",
+                "2   4   6   9  12  22",
                 "# The contour linewidth",
-                "2 1.5 1.5 1.5 1.5",
+                "2 1.5 1.5 1.5 1.5 1.5",
                 "# The contour colors",
-                "k   r   k   b   k",
+                "k   r   k   k   b   k",
             ]
             np.savetxt(self.default_name, s, fmt = '%s')
             return
