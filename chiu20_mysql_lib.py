@@ -77,6 +77,16 @@ mq_cloud_format = np.array([
     ['`yso_number`', ' INT'],
     ['`class_i_yso_number`', ' INT'],
     ['`class_f_yso_number`', ' INT'],
+    # YSO lifetime
+    ['`yso_lifetime_Myr`', 'FLOAT'],
+    ['`e_yso_lifetime_Myr`', 'FLOAT'],
+    ['`class_i_yso_lifetime_Myr`', 'FLOAT'],
+    ['`e_class_i_yso_lifetime_Myr`', 'FLOAT'],
+    ['`class_f_yso_lifetime_Myr`', 'FLOAT'],
+    ['`e_class_f_yso_lifetime_Myr`', 'FLOAT'],
+    # YSO mass
+    ['`avg_yso_mass_Msun`', 'FLOAT'],
+    ['`e_avg_yso_mass_Msun`', 'FLOAT'],
     # Distance to the cloud
     ['`distance_pc`', ' FLOAT'],
     ['`e_distance_pc`', ' FLOAT'],
@@ -96,6 +106,10 @@ mq_cloud_format = np.array([
     # Star Formation Rate (SFR)
     ['`sfr_Msun_per_Myr`', ' FLOAT'],
     ['`e_sfr_Msun_per_Myr`', ' FLOAT'],
+    ['`sfr_I_Msun_per_Myr`', ' FLOAT'],
+    ['`e_sfr_I_Msun_per_Myr`', ' FLOAT'],
+    ['`sfr_F_Msun_per_Myr`', ' FLOAT'],
+    ['`e_sfr_F_Msun_per_Myr`', ' FLOAT'],
     # Star Formation Rate density (All YSO)
     ['`sfr_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],
     ['`e_sfr_surface_density_Msun_per_Myr_pc2`', ' FLOAT'],

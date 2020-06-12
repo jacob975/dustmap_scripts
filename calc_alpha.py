@@ -26,7 +26,7 @@ Editor:
 ####################################
 update log
 20200612 version alpha 1:
-
+    1. The code works.
 '''
 # First, we’ll import the necessary modules:
 import time
@@ -54,7 +54,7 @@ def sed_to_alpha(sed, Q):
     # Make lambda and flux*lambda list
     for i, band_name in enumerate(band_name_list):    
         # Choose the band that detected.
-        if Q[i] != 'A':
+        if Q[3+i] != 'A':
             continue
         # Index start at 3 because we skip band J, H, and K.
         band_flux = sed[3+i]
@@ -63,7 +63,10 @@ def sed_to_alpha(sed, Q):
         e_log_l_F.append(np.log10(spitzer_system[band_name][1] * (e_band_flux+band_flux)/band_flux))
         log_l.append(np.log10(spitzer_system[band_name][1])) 
     w_log_l_F = np.divide(1, np.array(e_log_l_F))
-    paras = np.polyfit(log_l, log_l_F, 1, w = w_log_l_F)
+    try:
+        paras = np.polyfit(log_l, log_l_F, 1, w = w_log_l_F)
+    except:
+        exit()
     # Calculate alpha and derive yso class
     alpha = paras[0]
     if alpha >= 0.3:

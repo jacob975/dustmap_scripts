@@ -122,11 +122,11 @@ if __name__ == "__main__":
     pix_area_in_deg2_col = abs(h_col['CDELT1'] * h_col['CDELT2']) 
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
     # Result hosts
-    # Av_range, mask_area_deg2, mask_area_pc2, dust_mass_Msun
+    # Av_range, mask_area_deg2, mask_area_pc2, dust_mass_Msun, distance
     result_table = np.zeros((len(levels), 5), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    distance = dist_lib.chamaeleon_13_distance
+    distance = dist_lib.perseus_distance
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
     prev_level = None

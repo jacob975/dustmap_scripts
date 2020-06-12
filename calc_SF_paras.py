@@ -54,35 +54,64 @@ if __name__ == "__main__":
     data_list = aa.load(data_name)
     region_name = data_list[0]
     num_yso = int(data_list[1]) # number
-    avg_yso_age = float(data_list[2])   # Myr
-    avg_yso_mass = float(data_list[3])  # Msun
-    cloud_mass = float(data_list[4])    # Msun
-    cloud_area_deg2 = float(data_list[5])   # deg^2
-    avg_cloud_distance = float(data_list[6])    # kpc
-    avg_cloud_age = float(data_list[7]) # Myr
-    Av_threshold = data_list[8] # mag
-    comments = data_list[9]
+    num_i = int(data_list[2]) # number
+    num_f = int(data_list[3]) # number
+    avg_yso_lt = float(data_list[4])   # Myr
+    avg_class_i_yso_lt = float(data_list[5])   # Myr
+    avg_class_f_yso_lt = float(data_list[6])   # Myr
+    avg_yso_mass = float(data_list[7])  # Msun
+    cloud_mass = float(data_list[8])    # Msun
+    cloud_area_deg2 = float(data_list[9])   # deg^2
+    avg_cloud_distance = float(data_list[10])    # kpc
+    avg_cloud_age = float(data_list[11]) # Myr
+    Av_threshold = data_list[12] # mag
+    comments = data_list[13]
     flag_sfr = 'A'
+    flag_i_sfr = 'A'
+    flag_f_sfr = 'A'
     #--------------------------------------------
     # Exceptions
+    # All YSO number
     if num_yso <= 0:
         assumed_num_yso = 1
         flag_sfr = 'U'
     else:
         assumed_num_yso = num_yso
+    # Class I YSO number
+    if num_i <= 0:
+        assumed_num_i = 1
+        flag_i_sfr = 'U'
+    else:
+        assumed_num_i = num_i
+    # Class F YSO number
+    if num_f <= 0:
+        assumed_num_f = 1
+        flag_f_sfr = 'U'
+    else:
+        assumed_num_f = num_f
     #--------------------------------------------
     # Calculate the Star Formation parameters.
     # Side results, required to obtain main results.
     cloud_area_sr = cloud_area_deg2 * (np.pi**2) / (180**2) # sr
     cloud_area_pc2 = cloud_area_sr * avg_cloud_distance**2 # pc^2
     total_yso_mass = assumed_num_yso * avg_yso_mass # Msun
+    total_class_i_yso_mass = assumed_num_i * avg_yso_mass # Msun
+    total_class_f_yso_mass = assumed_num_f * avg_yso_mass # Msun
     # Main results
     cloud_surface_density = cloud_mass/cloud_area_pc2 # Msun / pc^2
-    num_yso_per_area_deg2 = assumed_num_yso / cloud_area_deg2 # number / deg^2
-    num_yso_per_area_pc2 = assumed_num_yso / cloud_area_pc2    # number / pc^2
+    num_yso_per_area_deg2 = assumed_num_yso / cloud_area_deg2   # number / deg^2
+    num_yso_per_area_pc2 = assumed_num_yso / cloud_area_pc2     # number / pc^2
+    num_yso_per_area_deg2 = assumed_num_i / cloud_area_deg2     # number / deg^2
+    num_yso_per_area_pc2 = assumed_num_i / cloud_area_pc2       # number / pc^2
+    num_yso_per_area_deg2 = assumed_num_f / cloud_area_deg2    # number / deg^2
+    num_yso_per_area_pc2 = assumed_num_f / cloud_area_pc2       # number / pc^2
     # "sfr" stands for star formation rate
-    sfr = total_yso_mass / avg_yso_age  # Msun / Myr
+    sfr = total_yso_mass / avg_yso_lt  # Msun / Myr
+    sfr_i = total_class_i_yso_mass / avg_class_i_yso_lt  # Msun / Myr
+    sfr_f = total_class_f_yso_mass / avg_class_f_yso_lt  # Msun / Myr
     sfr_per_area_pc2 = sfr / cloud_area_pc2 # Msun / (Myr * pc^2)
+    sfr_i_per_area_pc2 = sfr_i / cloud_area_pc2 # Msun / (Myr * pc^2)
+    sfr_f_per_area_pc2 = sfr_f / cloud_area_pc2 # Msun / (Myr * pc^2)
     # "sfe stands for star formation efficiency"
     sfe = np.divide(total_yso_mass, cloud_mass + total_yso_mass) # ratio
     # dep stand for depletion time
@@ -116,9 +145,19 @@ if __name__ == "__main__":
     print("Av threshold (mag): {0}".format(Av_threshold))
     print("Cloud Mass (Msun): {0}".format(cloud_mass))
     print("cloud_surface_density (Msun/pc^2): {0}".format(cloud_surface_density))
+    # All YSO
     print("Star formation rate (Msun/Myr): {0}".format(sfr))
     print("Star formation rate per area (Msun/Myr/pc^2): {0}".format(sfr_per_area_pc2))
     print("Star formation rate flag: {0}".format(flag_sfr))
+    # Class I YSO
+    print("Star formation rate (Msun/Myr): {0}".format(sfr_i))
+    print("Star formation rate per area (Msun/Myr/pc^2): {0}".format(sfr_i_per_area_pc2))
+    print("Star formation rate flag: {0}".format(flag_i_sfr))
+    # Class Flat YSO
+    print("Star formation rate (Msun/Myr): {0}".format(sfr_f))
+    print("Star formation rate per area (Msun/Myr/pc^2): {0}".format(sfr_f_per_area_pc2))
+    print("Star formation rate flag: {0}".format(flag_f_sfr))
+    
     print("cloud depletion time (Myr): {0}".format(cloud_t_dep))
     print("cloud free-fall time (Myr): {0}".format(cloud_t_ff))
     print("Star formation rate in a unit of free-fall time (ratio): {0}".format(sfr_per_t_ff))
@@ -153,9 +192,23 @@ if __name__ == "__main__":
     data[mq_cloud_format_keys.index('`Av_threshold`')] = Av_threshold 
     data[mq_cloud_format_keys.index('`cloud_mass_Msun`')] = cloud_mass
     data[mq_cloud_format_keys.index('`cloud_surface_density_Msun_per_pc2`')] = cloud_surface_density 
+    # All YSO
+    data[mq_cloud_format_keys.index('`avg_yso_mass_Msun`')] = avg_yso_mass
+    data[mq_cloud_format_keys.index('`yso_lifetime_Myr`')] = avg_yso_lt
     data[mq_cloud_format_keys.index('`sfr_Msun_per_Myr`')] = sfr 
     data[mq_cloud_format_keys.index('`sfr_surface_density_Msun_per_Myr_pc2`')] = sfr_per_area_pc2
     data[mq_cloud_format_keys.index('`flag_sfr_surface_density_Msun_per_Myr_pc2`')] = flag_sfr 
+    # Class I YSO
+    data[mq_cloud_format_keys.index('`class_i_yso_lifetime_Myr`')] = avg_class_i_yso_lt
+    data[mq_cloud_format_keys.index('`sfr_I_Msun_per_Myr`')] = sfr_i 
+    data[mq_cloud_format_keys.index('`sfr_I_surface_density_Msun_per_Myr_pc2`')] = sfr_i_per_area_pc2
+    data[mq_cloud_format_keys.index('`flag_sfr_I_surface_density_Msun_per_Myr_pc2`')] = flag_sfr 
+    # Class F YSO
+    data[mq_cloud_format_keys.index('`class_f_yso_lifetime_Myr`')] = avg_class_f_yso_lt
+    data[mq_cloud_format_keys.index('`sfr_F_Msun_per_Myr`')] = sfr_f 
+    data[mq_cloud_format_keys.index('`sfr_F_surface_density_Msun_per_Myr_pc2`')] = sfr_f_per_area_pc2
+    data[mq_cloud_format_keys.index('`flag_sfr_F_surface_density_Msun_per_Myr_pc2`')] = flag_sfr 
+
     data[mq_cloud_format_keys.index('`cloud_depletion_time_Myr`')] = cloud_t_dep 
     data[mq_cloud_format_keys.index('`cloud_free_fall_time_Myr`')] = cloud_t_ff
     data[mq_cloud_format_keys.index('`sfr_per_t_ff`')] = sfr_per_t_ff

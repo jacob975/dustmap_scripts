@@ -3,7 +3,7 @@
 Abstract:
     This is a program to calculate the cloud mass based on column density map and extintion map.
 Usage:
-    Av_region_YSO.py [contour config] [YSO coord] [extinction map] 
+    Av_region_YSO.py [contour config] [YSO coord] [YSO cls_pred] [YSO class] [extinction map] 
     extinction map unit: Av in mag
 Output:
     1. Show the YSO number in different Av region.
@@ -42,15 +42,29 @@ class cloud_yso_set():
     def __init__(self):
         self.mask_area_deg2 = 0.0 
         self.yso_number = 0
+        self.class_i_yso_number = 0
+        self.class_f_yso_number = 0
 
-def calc_yso_number(yso_pixel_array, Av_threshold, Av_map, pix_area_deg2):
+def calc_yso_number(
+        yso_pixel_array, 
+        class_i_pixel_array, 
+        class_f_pixel_array, 
+        Av_threshold, 
+        Av_map, 
+        pix_area_deg2
+    ):
     selected_Av = Av_map[Av_map > Av_threshold]
     ans = cloud_yso_set()
-    #print(Av_map[yso_pixel_array[:,1], yso_pixel_array[:,0]])
     index_selected_yso = np.where(Av_map[yso_pixel_array[:,1], yso_pixel_array[:,0]] > Av_threshold)[0]
+    index_selected_class_i = np.where(Av_map[class_i_pixel_array[:,1], class_i_pixel_array[:,0]] > Av_threshold)[0]
+    index_selected_class_f = np.where(Av_map[class_f_pixel_array[:,1], class_f_pixel_array[:,0]] > Av_threshold)[0]
     num_yso = len(index_selected_yso)
+    num_i = len(index_selected_class_i)
+    num_f = len(index_selected_class_f)
     ans.mask_area_deg2 = pix_area_deg2*len(selected_Av) 
     ans.yso_number = num_yso
+    ans.class_i_yso_number = num_i
+    ans.class_f_yso_number = num_f
     #print(ans.mask_area_deg2, ans.yso_number)
     return False, ans
 #--------------------------------------------
@@ -65,26 +79,33 @@ if __name__ == "__main__":
     aa = option_Av_region_paras(default_contour_config_name)
     #-----------------------------------
     # Load argv
-    if len(argv) != 5:
+    if len(argv) != 6:
         print ("The number of arguments is wrong.")
-        print ("Usage: Av_region_YSO.py [contour config] [coord] [cls_pred] [extinction map]") 
+        print ("Usage: Av_region_YSO.py [contour config] [coord] [cls_pred] [yso_class] [extinction map]") 
         aa.create()
         exit()
     contour_config_name = argv[1]
     coord_name = argv[2]
     cls_pred_name = argv[3]
-    Av_name = argv[4]
+    yso_class_name = argv[4]
+    Av_name = argv[5]
     print("Arguments:\n{0}".format(argv))
     #--------------------------------------------
     # Load data and image
     coord_array = np.loadtxt(coord_name, dtype = float)
     cls_pred = np.loadtxt(cls_pred_name, dtype = int)
-    yso_index = np.where(cls_pred == 2)[0]
-    yso_coord = coord_array[yso_index]
+    yso_class = np.loadtxt(yso_class_name, dtype = object)
     hdu_Av = fits.open(Av_name)
     Av = hdu_Av[1].data 
     h_Av = hdu_Av[1].header 
     w_Av = WCS(h_Av)
+    # Obtain the index of YSO
+    yso_index = np.where(cls_pred == 2)[0]
+    class_i_yso_index = np.where((cls_pred == 2) & (yso_class == 'I'))
+    class_f_yso_index = np.where((cls_pred == 2) & (yso_class == 'Flat'))
+    yso_coord = coord_array[yso_index]
+    class_i_yso_coord = coord_array[class_i_yso_index]
+    class_f_yso_coord = coord_array[class_f_yso_index]
     #--------------------------------------------
     # Initialize the image parameters
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
@@ -97,8 +118,8 @@ if __name__ == "__main__":
     print("linewidth: \n{0}".format(linewidths))
     print("colors: \n{0}".format(colors))
     # Result hosts
-    # Av_range, yso_num_range
-    result_table = np.zeros((len(levels), 2), dtype = object)
+    # Av_range, YSO_num, Class_I_YSO_num, Class_F_YSO_num
+    result_table = np.zeros((len(levels), 4), dtype = object)
     #--------------------------------------------
     # Calculate the number of YSO in certain Av range 
     prev_level = None
@@ -110,26 +131,45 @@ if __name__ == "__main__":
         new_result_set = None 
         Av_range = None
         mask_area_deg2 = None
-        yso_num_range = None
+        num_yso = None
+        num_i = None
+        num_f = None
         # Renew the results
         yso_pixel = np.array(np.round(w_Av.wcs_world2pix(yso_coord, 0)), dtype = int)
-        Failure, new_result_set = calc_yso_number(yso_pixel, level, Av, pix_area_in_deg2_Av)
+        class_i_yso_pixel = np.array(np.round(w_Av.wcs_world2pix(class_i_yso_coord, 0)), dtype = int)
+        class_f_yso_pixel = np.array(np.round(w_Av.wcs_world2pix(class_f_yso_coord, 0)), dtype = int)
+        Failure, new_result_set = calc_yso_number(
+            yso_pixel, 
+            class_i_yso_pixel, 
+            class_f_yso_pixel, 
+            level, 
+            Av, 
+            pix_area_in_deg2_Av
+        )
         if Failure:
             continue
         elif the_first:
             the_first = False
             Av_range = "Av > {0}".format(level)
             mask_area_deg2 = new_result_set.mask_area_deg2
-            yso_num_range = new_result_set.yso_number
+            num_yso = new_result_set.yso_number
+            num_i = new_result_set.class_i_yso_number
+            num_f = new_result_set.class_f_yso_number
         else:
             Av_range = "{0} < Av <= {1}".format(level, prev_level) 
             mask_area_deg2 = new_result_set.mask_area_deg2 - prev_result_set.mask_area_deg2
-            yso_num_range = new_result_set.yso_number - prev_result_set.yso_number
+            num_yso = new_result_set.yso_number - prev_result_set.yso_number
+            num_i = new_result_set.class_i_yso_number - prev_result_set.class_i_yso_number
+            num_f = new_result_set.class_f_yso_number - prev_result_set.class_f_yso_number
         result_table[i, 0] = Av_range
-        result_table[i, 1] = yso_num_range 
+        result_table[i, 1] = num_yso 
+        result_table[i, 2] = num_i
+        result_table[i, 3] = num_f
         print(Av_range)
         print("mask_area_deg2: {0}".format(mask_area_deg2))
-        print("YSO number: {0}".format(yso_num_range))
+        print("YSO number: {0}".format(num_yso))
+        print("Class I YSO number: {0}".format(num_i))
+        print("Class F YSO number: {0}".format(num_f))
             
         # Update the last result by this result
         prev_level = level
