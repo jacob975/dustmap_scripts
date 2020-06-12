@@ -126,7 +126,7 @@ if __name__ == "__main__":
     result_table = np.zeros((len(levels), 5), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    distance = dist_lib.serpens_distance
+    distance = dist_lib.chamaeleon_13_distance
     # Estimate the cloud mass
     print("distance (pc): {0}".format(distance))
     prev_level = None

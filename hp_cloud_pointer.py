@@ -119,7 +119,7 @@ if __name__ == "__main__":
     aa = option_hp_cloud_pointer(default_cloud_list_name)
     if len(argv) != 4:
         print("The number of arguments is wrong.")
-        print("Usage: hp_cloud_pointer.py [cloud list] [map name]")
+        print("Usage: hp_cloud_pointer.py [cloud list] [cloud name] [map name]")
         print("Please edit option file ({0}) before execution.".format(default_cloud_list_name))
         aa.create()
         exit()
