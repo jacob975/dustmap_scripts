@@ -1,12 +1,13 @@
 #!/usr/bin/python3
-
+from uncertainties import ufloat
 #--------------------------------------------
 # Given cloud distance
 #--------------
+# TODO
 # c2d provides:
-perseus_distance = 250
+perseus_distance = ufloat(250, 50)
 # For Aquila, Serpens
-serpens_distance = 260
+serpens_distance = ufloat(260, 10)
 chamaeleon_2_distance = 178
 ophiuchus_distance = 125
 lupus_distance = 150

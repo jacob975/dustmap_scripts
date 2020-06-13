@@ -60,19 +60,31 @@ if __name__ == "__main__":
     # Load fields from the map
     # 0, 1: Av, DL
     # 2, 3: Av, RQ
-    DL07_paras, hp_header = hp.read_map(
+    AvRQ_DL07_paras, hp_header = hp.read_map(
         map_name,
         # field indicates which column you choose to load, starting from 0.
         field = 2,
         h = True,
         nest=None,
     )
-    hp_hdu = fits.ImageHDU(DL07_paras, fits.Header(hp_header))
-    hp_hdu.header['UNIT'] = "Av"
+    e_AvRQ_DL07_paras, e_hp_header = hp.read_map(
+        map_name,
+        # field indicates which column you choose to load, starting from 0.
+        field = 3,
+        h = True,
+        nest=None,
+    )
+    hp_hdu = fits.ImageHDU(AvRQ_DL07_paras, fits.Header(hp_header))
+    hp_hdu.header['UNIT'] = "mag"
+    e_hp_hdu = fits.ImageHDU(e_AvRQ_DL07_paras, fits.Header(e_hp_header))
+    e_hp_hdu.header['UNIT'] = "mag"
+    
     #-------------------------------------------------
+    # For debugging
     # Draw the map
+    '''
     hp.mollview(
-        DL07_paras,
+        AvRQ_DL07_paras,
         unit="Av",
         #norm = 'log',
         nest=True,
@@ -81,11 +93,12 @@ if __name__ == "__main__":
     )
     hp.graticule()
     plt.show()
+    '''
     #-------------------------------------------------
-    # Save the SNR all-sky map
+    # Save the Av_RQ as a all-sky map
     hp.write_map(
         "Av_RQ.fits", 
-        DL07_paras,
+        [AvRQ_DL07_paras, e_AvRQ_DL07_paras],
         nest = True, 
         coord = 'G',
         overwrite = True,

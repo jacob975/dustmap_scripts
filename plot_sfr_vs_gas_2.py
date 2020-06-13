@@ -55,9 +55,11 @@ if __name__ == "__main__":
     # Each single cloud from Zucker+20
     gas_sigma_others = data[20:52,0]
     sfr_sigma_others = data[20:52,1]
-    # Av regions
-    gas_sigma_Av_regions = data[52:,0]
-    sfr_sigma_Av_regions = data[52:,1]
+    # Av regions, all YSO only
+    gas_sigma_Av_regions = data[52:131,0]
+    sfr_sigma_Av_regions = data[52:131,1]
+    # c2d, Gould belt with All YSO, Class I YSO, and Class Flat YSO.
+
     #--------------------------------------------
     # Plot the figure
     fig, ax = plt.subplots(figsize = (8,8))

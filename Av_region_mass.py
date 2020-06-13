@@ -37,6 +37,8 @@ from astropy.wcs.utils import proj_plane_pixel_area
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
+from uncertainties import ufloat, unumpy
+
 from input_lib import option_Av_region_paras
 import dist_lib 
 
@@ -47,20 +49,23 @@ class cloud_mass_set():
         self.mask_area_pc2 = 0.0 
         self.dust_mass_Msun = 0.0
 
-def calc_cloud_mass(col, mask, pix_area_deg2, distance_pc):
+def calc_cloud_mass(col, e_col, mask, pix_area_deg2, u_distance_pc):
     # distance in pc
     selected_col = col[mask]
-    sum_col_M_kpc2 = np.sum(selected_col)
+    e_selected_col = e_col[mask]
+    u_selected_col = unumpy.uarray(selected_col, e_selected_col)
+    #sum_col_M_kpc2 = np.sum(selected_col)
+    u_sum_col_M_kpc2 = u_selected_col.sum()
     # Trial 1
-    sum_col_M_sr = sum_col_M_kpc2 * (distance_pc/1000)**2
-    sum_col_M_deg2 = sum_col_M_sr * (np.pi**2) / (180**2)
-    dust_mass_Msun = sum_col_M_deg2 * pix_area_deg2
+    u_sum_col_M_sr = u_sum_col_M_kpc2 * (u_distance_pc/1000)**2
+    u_sum_col_M_deg2 = u_sum_col_M_sr * (np.pi**2) / (180**2)
+    u_dust_mass_Msun = u_sum_col_M_deg2 * pix_area_deg2
     # Trial 2
     pix_area_sr = pix_area_deg2 * (np.pi**2) / (180**2)
-    pix_area_kpc2 = pix_area_sr * (distance_pc/1000)**2
-    cloud_dust_mass_2 = sum_col_M_kpc2 * pix_area_kpc2
+    u_pix_area_kpc2 = pix_area_sr * (u_distance_pc/1000)**2
+    u_cloud_dust_mass_2 = u_sum_col_M_kpc2 * u_pix_area_kpc2
     # Not related
-    mask_area_pc2 = pix_area_deg2 * (np.pi**2) / (180**2) * (distance_pc)**2 * len(selected_col)
+    u_mask_area_pc2 = pix_area_deg2 * (np.pi**2) / (180**2) * (u_distance_pc)**2 * len(selected_col)
     #-----------------------------------------------------------
     # Save the answer
     if len(selected_col) == 0:
@@ -71,10 +76,10 @@ def calc_cloud_mass(col, mask, pix_area_deg2, distance_pc):
     mask_area_deg2 = pix_area_deg2 * len(selected_col)
     
     ans = cloud_mass_set()
-    ans.distance_pc = distance_pc,
+    ans.u_distance_pc = u_distance_pc,
     ans.mask_area_deg2 = mask_area_deg2,
-    ans.mask_area_pc2 = mask_area_pc2,
-    ans.dust_mass_Msun = dust_mass_Msun,
+    ans.u_mask_area_pc2 = u_mask_area_pc2,
+    ans.u_dust_mass_Msun = u_dust_mass_Msun,
     return False, ans
 
 #--------------------------------------------
@@ -102,6 +107,7 @@ if __name__ == "__main__":
     # Load image
     hdu_col = fits.open(col_den_name)
     col = hdu_col[1].data 
+    e_col = hdu_col[2].data
     h_col = hdu_col[1].header 
     w_col = WCS(h_col)
     hdu_Av = fits.open(Av_name)
@@ -126,21 +132,21 @@ if __name__ == "__main__":
     result_table = np.zeros((len(levels), 5), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    distance = dist_lib.perseus_distance
+    u_distance = dist_lib.perseus_distance
     # Estimate the cloud mass
-    print("distance (pc): {0}".format(distance))
+    print("distance (pc): {0}".format(u_distance))
     prev_level = None
     prev_result_set = cloud_mass_set()
     the_first = True
     Av_range = None
     mask_area_deg2 = None
-    mask_area_pc2 = None
-    dust_mass_Msun = None
+    u_mask_area_pc2 = None
+    u_dust_mass_Msun = None
     for i, level in enumerate(levels):
         # Renew the results
         new_result_set = None 
         Av_mask = np.where(Av > level)
-        Failure, new_result_set = calc_cloud_mass(col, Av_mask, pix_area_in_deg2_col, distance)
+        Failure, new_result_set = calc_cloud_mass(col, e_col, Av_mask, pix_area_in_deg2_col, u_distance)
         if Failure:
             continue
         elif the_first:
@@ -148,23 +154,23 @@ if __name__ == "__main__":
             print("-------------------------------")
             Av_range = "Av > {0}".format(level)
             mask_area_deg2 = new_result_set.mask_area_deg2[0]
-            mask_area_pc2 = new_result_set.mask_area_pc2[0]
-            dust_mass_Msun = new_result_set.dust_mass_Msun[0]
+            u_mask_area_pc2 = new_result_set.u_mask_area_pc2[0]
+            u_dust_mass_Msun = new_result_set.u_dust_mass_Msun[0]
         else:
             print("-------------------------------")
             Av_range = "{0} < Av <= {1} ".format(level, prev_level) 
             mask_area_deg2 = new_result_set.mask_area_deg2[0] - prev_result_set.mask_area_deg2[0]
-            mask_area_pc2 =  new_result_set.mask_area_pc2[0] - prev_result_set.mask_area_pc2[0]
-            dust_mass_Msun = new_result_set.dust_mass_Msun[0] - prev_result_set.dust_mass_Msun[0]
+            u_mask_area_pc2 =  new_result_set.u_mask_area_pc2[0] - prev_result_set.u_mask_area_pc2[0]
+            u_dust_mass_Msun = new_result_set.u_dust_mass_Msun[0] - prev_result_set.u_dust_mass_Msun[0]
         result_table[i, 0] = Av_range
         result_table[i, 1] = mask_area_deg2
-        result_table[i, 2] = mask_area_pc2
-        result_table[i, 3] = dust_mass_Msun
-        result_table[i, 4] = distance
+        result_table[i, 2] = u_mask_area_pc2
+        result_table[i, 3] = u_dust_mass_Msun
+        result_table[i, 4] = u_distance
         print(Av_range)
-        print("mask_area_deg2: {0}".format(mask_area_deg2))
-        print("mask_area_pc2: {0}".format(mask_area_pc2))
-        print("dust_mass_Msun: {0}".format(dust_mass_Msun))
+        print("mask_area_deg2: {0}".format(u_mask_area_deg2))
+        print("mask_area_pc2: {0}".format(u_mask_area_pc2))
+        print("dust_mass_Msun: {0}".format(u_dust_mass_Msun))
             
         # Update the last result by this result
         prev_level = level

@@ -73,6 +73,8 @@ mq_cloud_format = np.array([
     ['`index`', ' INT AUTO_INCREMENT PRIMARY KEY'],
     ['`dt`', ' DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'],
     ['`cloud`', ' VARCHAR(100)'],
+    ['`l_deg`', 'FLOAT'],
+    ['`b_deg`', 'FLOAT'],
     # Number of YSO
     ['`yso_number`', ' INT'],
     ['`class_i_yso_number`', ' INT'],
@@ -87,16 +89,28 @@ mq_cloud_format = np.array([
     # YSO mass
     ['`avg_yso_mass_Msun`', 'FLOAT'],
     ['`e_avg_yso_mass_Msun`', 'FLOAT'],
+    ['`total_yso_mass_Msun`', 'FLOAT'],
+    ['`e_total_yso_mass_Msun`', 'FLOAT'],
+    ['`total_class_i_yso_mass_Msun`', 'FLOAT'],
+    ['`e_total_class_i_yso_mass_Msun`', 'FLOAT'],
+    ['`total_class_f_yso_mass_Msun`', 'FLOAT'],
+    ['`e_total_class_f_yso_mass_Msun`', 'FLOAT'],
     # Distance to the cloud
     ['`distance_pc`', ' FLOAT'],
     ['`e_distance_pc`', ' FLOAT'],
     # Surface area of the cloud
     ['`area_deg2`', ' FLOAT'],
-    ['`e_area_deg2`', ' FLOAT'],
     ['`area_pc2`', ' FLOAT'],
     ['`e_area_pc2`', ' FLOAT'],
     ['`yso_number_per_deg2`', ' FLOAT'],
     ['`yso_number_per_pc2`', ' FLOAT'],
+    ['`e_yso_number_per_pc2`', ' FLOAT'],
+    ['`class_i_yso_number_per_deg2`', ' FLOAT'],
+    ['`class_i_yso_number_per_pc2`', ' FLOAT'],
+    ['`e_class_i_yso_number_per_pc2`', ' FLOAT'],
+    ['`class_f_yso_number_per_deg2`', ' FLOAT'],
+    ['`class_f_yso_number_per_pc2`', ' FLOAT'],
+    ['`e_class_f_yso_number_per_pc2`', ' FLOAT'],
     ['`Av_threshold`', ' VARCHAR(20)'],
     # Cloud mass derived from extinctions or dust emission.
     ['`cloud_mass_Msun`', ' FLOAT'],
@@ -124,10 +138,14 @@ mq_cloud_format = np.array([
     ['`flag_sfr_F_surface_density_Msun_per_Myr_pc2`', 'VARCHAR(4)'],
     # Depletion time
     ['`cloud_depletion_time_Myr`', ' FLOAT'],
+    ['`e_cloud_depletion_time_Myr`', ' FLOAT'],
     ['`cloud_free_fall_time_Myr`', ' FLOAT'],
+    ['`e_cloud_free_fall_time_Myr`', ' FLOAT'],
     ['`sfr_per_t_ff`', ' FLOAT'],
+    ['`e_sfr_per_t_ff`', ' FLOAT'],
     # Star Formation Efficiency (SFE)
     ['`sfe`', ' FLOAT'],
+    ['`e_sfe`', ' FLOAT'],
     # Input files and Assumptions
     ['`input_file`', 'VARCHAR(100)'],
     ['`reference`', 'VARCHAR(100)'],

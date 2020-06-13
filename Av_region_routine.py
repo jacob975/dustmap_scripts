@@ -53,19 +53,21 @@ if __name__ == "__main__":
     options = aa.load(option_name)
     
     region_name = options[0]
-    #num_yso = int(options[1]) # number
-    #num_i = int(options[2]) # number
-    #num_f = int(options[3]) # number
-    avg_yso_lt = float(options[4])   # Myr
-    avg_class_i_yso_lt = float(options[5])   # Myr
-    avg_class_f_yso_lt = float(options[6])   # Myr
-    avg_yso_mass = float(options[7])  # Msun
-    #cloud_mass = float(options[8])    # Msun
-    #cloud_area_deg2 = float(options[9])   # deg^2
-    #avg_cloud_distance = float(options[10])    # kpc
-    avg_cloud_age = float(options[11]) # Myr
-    Av_threshold = options[12] # mag
-    comments = options[13]
+    l_deg = options[1] # deg
+    b_deg = options[2] # deg
+    #num_yso = int(options[3]) # number
+    #num_i = int(options[4]) # number
+    #num_f = int(options[5]) # number
+    avg_yso_lt = float(options[6])   # Myr
+    avg_class_i_yso_lt = float(options[7])   # Myr
+    avg_class_f_yso_lt = float(options[8])   # Myr
+    avg_yso_mass = float(options[9])  # Msun
+    #cloud_mass = float(options[10])    # Msun
+    #cloud_area_deg2 = float(options[11])   # deg^2
+    #avg_cloud_distance = float(options[12])    # kpc
+    avg_cloud_age = float(options[13]) # Myr
+    Av_threshold = options[14] # mag
+    comments = options[15]
     # Load mass
     # Av_range, mask_area_deg2, mask_area_pc2, dust_mass_Msun, distance
     Av_region_mass = np.load(Av_region_mass_name)
@@ -79,19 +81,21 @@ if __name__ == "__main__":
         string_array = np.array(aa.s)
         # Update the string array by Av ranged data
         string_array[1] = region_name
-        string_array[6] = Av_region_yso[i,1]
-        string_array[8] = Av_region_yso[i,2]
-        string_array[10] = Av_region_yso[i,3]
-        string_array[12] = avg_yso_lt
-        string_array[14] = avg_class_i_yso_lt
-        string_array[16] = avg_class_f_yso_lt
-        string_array[18] = avg_yso_mass
-        string_array[23] = float(Av_region_mass[i, 3]) * 100
-        string_array[25] = Av_region_mass[i, 1]
-        string_array[27] = Av_region_mass[i, 4] 
-        string_array[29] = avg_cloud_age
-        string_array[31] = Av_region_yso[i,0]
-        string_array[36] = comments
+        string_array[3] = l_deg
+        string_array[5] = b_deg 
+        string_array[10] = Av_region_yso[i,1]
+        string_array[12] = Av_region_yso[i,2]
+        string_array[14] = Av_region_yso[i,3]
+        string_array[16] = avg_yso_lt
+        string_array[18] = avg_class_i_yso_lt
+        string_array[20] = avg_class_f_yso_lt
+        string_array[22] = avg_yso_mass
+        string_array[27] = float(Av_region_mass[i, 3]) * 100
+        string_array[29] = Av_region_mass[i, 1]
+        string_array[31] = Av_region_mass[i, 4] 
+        string_array[33] = avg_cloud_age
+        string_array[35] = Av_region_yso[i,0]
+        string_array[40] = comments
         # Save the string array
         np.savetxt("string_array.txt", string_array, fmt = '%s')
         # call calc_SF_paras.py to estimate SFR-gas relation
