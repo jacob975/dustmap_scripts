@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 '''
 Abstract:
-    This is a script provide functions to obtain SNR from  
-    COM_CompMap_Dust-DL07-AvMaps_2048_R2.00.fits
+    This is a script provide functions to obtain sigma dust mass from  
+    COM_CompMap_Dust-DL07-Parameters_2048_R2.00.fits
 Usage:
-    PLA_DL07_Av.py [healpix map]
+    PLA_DL07_mdust.py [healpix map]
 Output:
-    The SNR image of column density provided from COM_CompMap_Dust-DL07-AvMaps_2048_R2.00.fits. 
+    The sigma dust mass map (value and error) from COM_CompMap_Dust-DL07-Parameters_2048_R2.00.fits
 Editor:
     Jacob975
 
@@ -15,10 +15,10 @@ Editor:
 #   This code is made in python3 #
 ##################################
 
-20200414
+20200613
 ####################################
 update log
-20200414 version alpha 1:
+20200613 version alpha 1:
     1. The code works.
 '''
 import time
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     # Load arguemnts
     if len(argv) != 2:
         print("The number of arguments is wrong.")
-        print("Usage: PLA_DL07_Av.py [healpix map]")
+        print("Usage: PLA_DL07_mdust.py [healpix map]")
         exit()
     map_name = argv[1]
     #-------------------------------------------------
@@ -58,25 +58,28 @@ if __name__ == "__main__":
     print("### END of HEADER ###") 
     #-------------------------------------------------
     # Load fields from the map
-    # 0, 1: Av, DL
-    # 2, 3: Av, RQ
-    AvRQ_DL07_paras, hp_header = hp.read_map(
+    # 0, 1: SIGMA_MDUST
+    # 2, 3: Q_PAH
+    # 4, 5: F_PDR
+    # 6, 7: U_MIN
+    # 8   : CHI2_DOF
+    mdust_DL07_paras, hp_header = hp.read_map(
         map_name,
         # field indicates which column you choose to load, starting from 0.
-        field = 2,
+        field = 0,
         h = True,
         nest=None,
     )
-    e_AvRQ_DL07_paras, e_hp_header = hp.read_map(
+    e_mdust_DL07_paras, e_hp_header = hp.read_map(
         map_name,
         # field indicates which column you choose to load, starting from 0.
-        field = 3,
+        field = 1,
         h = True,
         nest=None,
     )
-    hp_hdu = fits.ImageHDU(AvRQ_DL07_paras, fits.Header(hp_header))
+    hp_hdu = fits.ImageHDU(mdust_DL07_paras, fits.Header(hp_header))
     hp_hdu.header['UNIT'] = "mag"
-    e_hp_hdu = fits.ImageHDU(e_AvRQ_DL07_paras, fits.Header(e_hp_header))
+    e_hp_hdu = fits.ImageHDU(e_mdust_DL07_paras, fits.Header(e_hp_header))
     e_hp_hdu.header['UNIT'] = "mag"
     
     #-------------------------------------------------
@@ -84,8 +87,8 @@ if __name__ == "__main__":
     # Draw the map
     '''
     hp.mollview(
-        AvRQ_DL07_paras,
-        unit="Av",
+        mdust_DL07_paras,
+        unit="Msun/pc2",
         #norm = 'log',
         nest=True,
         min = 0,
@@ -95,10 +98,10 @@ if __name__ == "__main__":
     plt.show()
     '''
     #-------------------------------------------------
-    # Save the Av_RQ as a all-sky map
+    # Save the SIGMA_MDUST as a all-sky map
     hp.write_map(
-        "Av_RQ.fits", 
-        [AvRQ_DL07_paras, e_AvRQ_DL07_paras],
+        "mdust.fits", 
+        [mdust_DL07_paras, e_mdust_DL07_paras],
         nest = True, 
         coord = 'G',
         overwrite = True,

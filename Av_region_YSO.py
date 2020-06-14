@@ -55,9 +55,18 @@ def calc_yso_number(
     ):
     selected_Av = Av_map[Av_map > Av_threshold]
     ans = cloud_yso_set()
-    index_selected_yso = np.where(Av_map[yso_pixel_array[:,1], yso_pixel_array[:,0]] > Av_threshold)[0]
-    index_selected_class_i = np.where(Av_map[class_i_pixel_array[:,1], class_i_pixel_array[:,0]] > Av_threshold)[0]
-    index_selected_class_f = np.where(Av_map[class_f_pixel_array[:,1], class_f_pixel_array[:,0]] > Av_threshold)[0]
+    try:
+        index_selected_yso = np.where(Av_map[yso_pixel_array[:,1], yso_pixel_array[:,0]] > Av_threshold)[0]   
+    except:
+        index_selected_yso = []
+    try:
+        index_selected_class_i = np.where(Av_map[class_i_pixel_array[:,1], class_i_pixel_array[:,0]] > Av_threshold)[0]
+    except:
+        index_selected_class_i = []
+    try:
+        index_selected_class_f = np.where(Av_map[class_f_pixel_array[:,1], class_f_pixel_array[:,0]] > Av_threshold)[0]
+    except:
+        index_selected_class_f = []
     num_yso = len(index_selected_yso)
     num_i = len(index_selected_class_i)
     num_f = len(index_selected_class_f)
@@ -67,6 +76,14 @@ def calc_yso_number(
     ans.class_f_yso_number = num_f
     #print(ans.mask_area_deg2, ans.yso_number)
     return False, ans
+
+def icrs2galactic(icrs_coords):
+    ans = []
+    for coord in icrs_coords:
+        temp = SkyCoord(coord[0], coord[1], frame = 'icrs', unit = 'deg')
+        ans.append([temp.galactic.l.deg, temp.galactic.b.deg])
+    ans_array = np.array(ans)
+    return ans_array
 #--------------------------------------------
 # Main code
 if __name__ == "__main__":
@@ -103,9 +120,15 @@ if __name__ == "__main__":
     yso_index = np.where(cls_pred == 2)[0]
     class_i_yso_index = np.where((cls_pred == 2) & (yso_class == 'I'))
     class_f_yso_index = np.where((cls_pred == 2) & (yso_class == 'Flat'))
-    yso_coord = coord_array[yso_index]
-    class_i_yso_coord = coord_array[class_i_yso_index]
-    class_f_yso_coord = coord_array[class_f_yso_index]
+    if h_Av['CTYPE1'][:4] == 'GLON':
+        yso_coord = icrs2galactic(coord_array[yso_index])
+        class_i_yso_coord = icrs2galactic(coord_array[class_i_yso_index])
+        class_f_yso_coord = icrs2galactic(coord_array[class_f_yso_index])
+    else:
+        yso_coord = coord_array[yso_index]
+        class_i_yso_coord = coord_array[class_i_yso_index]
+        class_f_yso_coord = coord_array[class_f_yso_index]
+        
     #--------------------------------------------
     # Initialize the image parameters
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
@@ -175,6 +198,12 @@ if __name__ == "__main__":
         prev_level = level
         prev_result_set = new_result_set 
     #--------------------------------------------
+    # Print the summary
+    print("-----------------------------------")
+    print("Summary")
+    print("YSO number: {0}".format(np.sum(result_table[:,1])))
+    print("Class I YSO number: {0}".format(np.sum(result_table[:,2])))
+    print("Class F YSO number: {0}".format(np.sum(result_table[:,3])))
     # Save the result
     print(result_table)
     np.save("Av_region_YSO", result_table) 

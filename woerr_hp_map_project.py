@@ -37,7 +37,7 @@ from astropy import units as u
 from input_lib import option_hp_map_project
 from hpproj import hp_project
 
-def hp_project_script(hp_hdu, e_hp_hdu, coord, shape_out, cloud_name):
+def hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta):
     #-------------------------------------------------
     # Cut a small piece from the map, taking LMC and SMC for example
     # examples of coordinates
@@ -53,25 +53,15 @@ def hp_project_script(hp_hdu, e_hp_hdu, coord, shape_out, cloud_name):
         shape_out = shape_out,
         projection = ("EQUATORIAL", "TAN"),
     )
-    e_hdu = hp_project(
-        e_hp_hdu,
-        coord,
-        pixsize=pixsize, 
-        shape_out = shape_out,
-        projection = ("EQUATORIAL", "TAN"),
-    )
-    print(hdu.data[:5,:5])
-    print(e_hdu.data[:5,:5])
-    plt.title("Cloud {0})".format(cloud_name))
+    plt.title("healpix {0} at ({1}, {2})".format(frame, alpha, delta))
     cut_data = hdu.data
     cut_w = WCS(hdu.header)
     fig = plt.subplot(111, projection = cut_w)
     ax = plt.imshow(cut_data)
     cbar = plt.colorbar(ax)
     cbar.set_label(hp_hdu.header['UNIT'], rotation=270, labelpad=15)
-    plt.savefig("healpix_{0}.png".format(cloud_name))
-    u_hdu = fits.HDUList([fits.PrimaryHDU(), hdu, e_hdu])
-    u_hdu.writeto("healpix_{0}.fits".format(cloud_name), overwrite = True)
+    plt.savefig("healpix_{0}_{1}_{2}.png".format(frame, alpha, delta))
+    hdu.writeto("healpix_{0}_{1}_{2}.fits".format(frame, alpha, delta), overwrite = True)
     return
 
 #--------------------------------------------
@@ -84,15 +74,14 @@ if __name__ == "__main__":
     # Argument Assistent (aa)
     default_option_file_name = 'option_hp_map_project.txt'
     aa = option_hp_map_project(default_option_file_name)
-    if len(argv) != 4:
+    if len(argv) != 3:
         print("The number of arguments is wrong.")
-        print("Usage: hp_map_project.py [option file] [cloud_name] [map name]")
+        print("Usage: hp_map_project.py [option file] [map name]")
         print("Please edit option file (option_hp_map_project.txt) before execution.")
         aa.create()
         exit()
     option_file_name = argv[1]
-    cloud_name = argv[2]
-    map_name = argv[3]
+    map_name = argv[2]
     # Load detail options from option file.
     option_list = aa.load(option_file_name)
     frame = option_list[0]
@@ -111,15 +100,6 @@ if __name__ == "__main__":
     )
     hp_hdu = fits.ImageHDU(DL07_paras, fits.Header(hp_header))
     hp_hdu.header['UNIT'] = r"$M_{sun}/kpc^2$"
-    e_DL07_paras, e_hp_header = hp.read_map(
-        map_name,
-        # field indicates which column you choose to load, starting from 0.
-        field = 1,
-        h = True,
-        nest=None,
-    )
-    e_hp_hdu = fits.ImageHDU(e_DL07_paras, fits.Header(e_hp_header))
-    e_hp_hdu.header['UNIT'] = r"$M_{sun}/kpc^2$"
     # Show the header of this map.
     hdul = fits.open(map_name)
     hdul.info()
@@ -163,9 +143,9 @@ if __name__ == "__main__":
     print("Minimum: {0}".format(min_DL07_paras))
     #-------------------------------------------------
     # Cut a small piece from the map, taking LMC and SMC for example
-    hp_project_script(hp_hdu, e_hp_hdu, coord, shape_out, cloud_name)
+    hp_project_script(hp_hdu, coord, shape_out, frame, alpha, delta)
     # Rename the option file
-    new_name = 'healpix_{0}_option.txt'.format(cloud_name)
+    new_name = 'healpix_{0}_{1}_{2}_option.txt'.format(frame, alpha, delta)
     cmd_line = 'cp {0} {1}'.format( 
         option_file_name,
         new_name)

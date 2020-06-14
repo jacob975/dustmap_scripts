@@ -29,7 +29,6 @@ from sys import argv
 
 import matplotlib.pyplot as plt
 from  matplotlib.colors import LogNorm
-from uncertainties import unumpy, ufloat
 import numpy as np
 
 from astropy.io import fits
@@ -40,23 +39,21 @@ from astropy import units as u
 
 import dist_lib
 
-def calc_cloud_mass(col, e_col, mask, pix_area_deg2, u_distance_pc):
+def calc_cloud_mass(col, mask, pix_area_deg2, distance_pc):
     # distance in pc
     print("---")
     selected_col = col[mask]
-    e_selected_col = e_col[mask]
-    u_selected_col = unumpy.uarray(selected_col, e_selected_col)
-    u_sum_col_M_kpc2 = u_selected_col.sum() 
+    sum_col_M_kpc2 = np.sum(selected_col)
     # Trial 1
-    u_sum_col_M_sr = u_sum_col_M_kpc2 * (u_distance_pc/1000)**2
-    u_sum_col_M_deg2 = u_sum_col_M_sr * (np.pi**2) / (180**2)
-    u_cloud_dust_mass = u_sum_col_M_deg2 * pix_area_deg2
+    sum_col_M_sr = sum_col_M_kpc2 * (distance_pc/1000)**2
+    sum_col_M_deg2 = sum_col_M_sr * (np.pi**2) / (180**2)
+    cloud_dust_mass = sum_col_M_deg2 * pix_area_deg2
     # Trial 2
     pix_area_sr = pix_area_deg2 * (np.pi**2) / (180**2)
-    u_pix_area_kpc2 = pix_area_sr * (u_distance_pc/1000)**2
-    u_cloud_dust_mass_2 = u_sum_col_M_kpc2 * u_pix_area_kpc2
+    pix_area_kpc2 = pix_area_sr * (distance_pc/1000)**2
+    cloud_dust_mass_2 = sum_col_M_kpc2 * pix_area_kpc2
     # Not related
-    u_mask_area_pc2 = pix_area_deg2 * (np.pi**2) / (180**2) * (u_distance_pc)**2 * len(selected_col)
+    mask_area_pc2 = pix_area_deg2 * (np.pi**2) / (180**2) * (distance_pc)**2 * len(selected_col)
     #-----------------------------------------------------------
     # Print the answer
     if len(selected_col) == 0:
@@ -64,11 +61,11 @@ def calc_cloud_mass(col, e_col, mask, pix_area_deg2, u_distance_pc):
         return
     print("max selected_col: {0}".format(np.max(selected_col)))
     print("num of pixel: {0}".format(len(selected_col)))
-    print("sum_col_M_kpc2: {0}".format(u_sum_col_M_kpc2))
+    print("sum_col_M_kpc2: {0}".format(sum_col_M_kpc2))
     print("pix_area_deg2: {0}".format(pix_area_deg2))
     print("mask_area_deg2: {0}".format(pix_area_deg2 * len(selected_col)))
-    print("mask_area_pc2: {0}".format(u_mask_area_pc2))
-    print("dust mass: {0} M_sun".format(u_cloud_dust_mass))
+    print("mask_area_pc2: {0}".format(mask_area_pc2))
+    print("dust mass: {0} M_sun".format(cloud_dust_mass))
     return
 
 #--------------------------------------------
@@ -89,7 +86,6 @@ if __name__ == "__main__":
     # Load image
     hdu_col = fits.open(col_den_name)
     col = hdu_col[1].data 
-    e_col = hdu_col[2].data 
     h_col = hdu_col[1].header 
     w_col = WCS(h_col)
     hdu_Av = fits.open(Av_name)
@@ -102,16 +98,16 @@ if __name__ == "__main__":
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
     #--------------------------------------------
     # Given cloud distance
-    u_distance = dist_lib.lupus_distance
+    distance = dist_lib.serpens_distance 
     # Estimate the cloud mass
-    print("distance (pc): {0}".format(u_distance))
+    print("distance (pc): {0}".format(distance))
     levels = [2, 4, 6, 9, 12, 22] 
     linewidths = [2, 1.5, 1.5, 1.5, 1.5, 1.5]
     colors = ['k', 'r', 'k', 'k', 'b', 'k']
     print("Av levels: \n{0}".format(levels))
     for level in levels:
         Av_mask = np.where(Av > level)
-        calc_cloud_mass(col, e_col, Av_mask, pix_area_in_deg2_col, u_distance)
+        calc_cloud_mass(col, Av_mask, pix_area_in_deg2_col, distance)
     #--------------------------------------------
     # Plot the contour
     plt.figure(figsize=(10,8))

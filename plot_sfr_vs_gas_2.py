@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 '''
 Abstract:
-    Print a figure that show the relation between SFR surface density and gas surface density.
+    Plot the SFR-gas relation in different Av contour regions (Without error consideration).
 Usage:
     plot_sfr_vs_gas.py.
 Output:
@@ -27,7 +27,7 @@ from sys import argv
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from chiu20_mysql_lib import load2py_mq_cloud
+from chiu20_mysql_lib import load2py_woerr_cloud
 #--------------------------------------------
 # Main code
 if __name__ == "__main__":
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     ]
     col_list_str = '|'.join(col_list)
     # Obtain data from SQL
-    data = load2py_mq_cloud(col_list)
+    data = load2py_woerr_cloud(col_list)
     data = np.array(data, dtype=float)
     # Each single cloud from c2d and Gould belt
     gas_sigma_c2d_gould_belt = data[:20,0]

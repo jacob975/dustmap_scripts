@@ -3,26 +3,26 @@ from uncertainties import ufloat
 #--------------------------------------------
 # Given cloud distance
 #--------------
-# TODO
 # c2d provides:
 perseus_distance = ufloat(250, 50)
 # For Aquila, Serpens
 serpens_distance = ufloat(260, 10)
-chamaeleon_2_distance = 178
-ophiuchus_distance = 125
-lupus_distance = 150
-lupus_3_distance = 200
+chamaeleon_2_distance = ufloat(178, 18)
+ophiuchus_distance = ufloat(125, 25)
+lupus_distance = ufloat(150, 20)
+lupus_3_distance = ufloat(200, 20)
 #--------------
 # Gould belt provides:
-chamaeleon_13_distance = 200
-auriga_distance = 300
-cepheus_distance = 300
-corona_australis_distance = 130
-ic5146_distance = 950
-musca_distance = 160
-scorpius_distance = 130
+chamaeleon_13_distance = ufloat(200, 20)
+auriga_distance = ufloat(300, 30)
+cepheus_distance = ufloat(300, 30)
+corona_australis_distance = ufloat(130, 25)
+ic5146_distance = ufloat(950, 80)
+musca_distance = ufloat(160, 20)
+scorpius_distance = ufloat(130, 15)
 #--------------
 # Zucker+20 provides:
+# TODO
 ara_distance = 1055
 cb28_distance = 398
 cb29_distance = 374

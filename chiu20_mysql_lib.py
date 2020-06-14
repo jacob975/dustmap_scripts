@@ -36,7 +36,7 @@ def create_tables():
     cnx = chiu_auth()
     cursor = cnx.cursor()
     #-----------------------------------------
-    # Create table `observation_data`, which save the data getting from image. 
+    # Create table `Measure_Quantities_Cloud`, which save the data getting from image. 
     mq_cloud_format_strings = []
     for i in range(len(mq_cloud_format)):
         mq_cloud_format_strings.append(
@@ -48,27 +48,44 @@ def create_tables():
     cursor.execute(sql)
     cnx.commit()
     #-----------------------------------------
-    # Close the database
-    cursor.close()
-    cnx.close()
-    return 
-
-def remove_mq_cloud():
-    cnx = chiu_auth()
-    cursor = cnx.cursor()
-    sql = 'drop table {0}'.format(mq_cloud_name)
+    # Create table `WOerr_Cloud`, which save the data without error
+    woerr_cloud_format_strings = []
+    for i in range(len(woerr_cloud_format)):
+        woerr_cloud_format_strings.append(
+            woerr_cloud_format[i, 0] + woerr_cloud_format[i, 1])
+    sql = 'create table if not exists `{0}` ({1})'.format(
+        woerr_cloud_name, 
+        ', '.join(woerr_cloud_format_strings)
+    )
     cursor.execute(sql)
     cnx.commit()
+    #-----------------------------------------
+    # Create table `WOerr_Cloud`, which save the data without error
+    mq_av_region_format_strings = []
+    for i in range(len(mq_av_region_format)):
+        mq_av_region_format_strings.append(
+            mq_av_region_format[i, 0] + mq_av_region_format[i, 1])
+    sql = 'create table if not exists `{0}` ({1})'.format(
+        mq_av_region_name, 
+        ', '.join(mq_av_region_format_strings)
+    )
+    cursor.execute(sql)
+    cnx.commit()
+    #-----------------------------------------
+    # Close the database
     cursor.close()
     cnx.close()
     return 
 
 def remove_tables():
     remove_mq_cloud()
+    remove_woerr_cloud()
+    remove_mq_av_region()
     return 
 #--------------------------------------------------
 
 mq_cloud_name = 'Measure_Quantities_Cloud'
+
 mq_cloud_format = np.array([
     ['`index`', ' INT AUTO_INCREMENT PRIMARY KEY'],
     ['`dt`', ' DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'],
@@ -186,3 +203,114 @@ def load2py_mq_cloud(col_list):
     cursor.close()
     cnx.close()
     return data
+
+def remove_mq_cloud():
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    sql = 'drop table {0}'.format(mq_cloud_name)
+    cursor.execute(sql)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return 
+#--------------------------------------------------
+
+mq_av_region_name = 'Measure_Quantities_Av_Regions'
+mq_av_region_format = mq_cloud_format
+
+def save2sql_mq_av_region(data):
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    # Creat database if did not exist.
+    create_tables()
+    # Save data into the table in the database.
+    cursor.execute( 
+        "insert into {0} ({1}) values ({2})".format(
+            mq_av_region_name,  
+            ', '.join(mq_av_region_format[2:,0]), 
+            ', '.join(['%s'] * len(mq_av_region_format[2:,0]))), 
+        tuple(data[2:]))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+def load2py_mq_av_region(col_list):
+    # Connect to SQL
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    col_list_str = ', '.join(col_list)
+    cursor.execute(
+        "select {0} from {1}".format(
+            col_list_str,
+            mq_av_region_name,
+        )
+    )
+    data = cursor.fetchall()
+    data = np.array(data, dtype = str)
+    # Close the SQL
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return data
+    
+def remove_mq_av_region():
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    sql = 'drop table {0}'.format(mq_av_region_name)
+    cursor.execute(sql)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return 
+
+
+#--------------------------------------------------
+
+woerr_cloud_name = 'WOerr_Cloud'
+woerr_cloud_format = mq_cloud_format
+
+def save2sql_woerr_cloud(data):
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    # Creat database if did not exist.
+    create_tables()
+    # Save data into the table in the database.
+    cursor.execute( 
+        "insert into {0} ({1}) values ({2})".format(
+            woerr_cloud_name,  
+            ', '.join(woerr_cloud_format[2:,0]), 
+            ', '.join(['%s'] * len(woerr_cloud_format[2:,0]))), 
+        tuple(data[2:]))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+def load2py_woerr_cloud(col_list):
+    # Connect to SQL
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    col_list_str = ', '.join(col_list)
+    cursor.execute(
+        "select {0} from {1}".format(
+            col_list_str,
+            woerr_cloud_name,
+        )
+    )
+    data = cursor.fetchall()
+    data = np.array(data, dtype = str)
+    # Close the SQL
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return data
+    
+def remove_woerr_cloud():
+    cnx = chiu_auth()
+    cursor = cnx.cursor()
+    sql = 'drop table {0}'.format(woerr_cloud_name)
+    cursor.execute(sql)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return 
+

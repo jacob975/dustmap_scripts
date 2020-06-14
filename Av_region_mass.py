@@ -44,10 +44,16 @@ import dist_lib
 
 class cloud_mass_set():
     def __init__(self):
-        self.distance_pc = 0.0 
+        self.u_distance_pc = ufloat(0,0) 
         self.mask_area_deg2 = 0.0 
-        self.mask_area_pc2 = 0.0 
-        self.dust_mass_Msun = 0.0
+        self.u_mask_area_pc2 =ufloat(0,0) 
+        self.u_dust_mass_Msun = ufloat(0,0)
+    def update(self, u_dist, ad, u_ap, u_mdust):
+        self.u_distance_pc = u_dist 
+        self.mask_area_deg2 = ad
+        self.u_mask_area_pc2 = u_ap
+        self.u_dust_mass_Msun = u_mdust
+        
 
 def calc_cloud_mass(col, e_col, mask, pix_area_deg2, u_distance_pc):
     # distance in pc
@@ -68,18 +74,26 @@ def calc_cloud_mass(col, e_col, mask, pix_area_deg2, u_distance_pc):
     u_mask_area_pc2 = pix_area_deg2 * (np.pi**2) / (180**2) * (u_distance_pc)**2 * len(selected_col)
     #-----------------------------------------------------------
     # Save the answer
+    ans = cloud_mass_set()
     if len(selected_col) == 0:
         print("No data available under this threshold.")
-        return True, None 
+        return True, ans 
     max_selected_col = np.max(selected_col)
     num_of_pixel = len(selected_col)
     mask_area_deg2 = pix_area_deg2 * len(selected_col)
+
+    ans.update(
+        u_distance_pc, 
+        mask_area_deg2, 
+        u_mask_area_pc2, 
+        u_dust_mass_Msun
+    )
     
-    ans = cloud_mass_set()
-    ans.u_distance_pc = u_distance_pc,
-    ans.mask_area_deg2 = mask_area_deg2,
-    ans.u_mask_area_pc2 = u_mask_area_pc2,
-    ans.u_dust_mass_Msun = u_dust_mass_Msun,
+    print(type(ans.u_distance_pc))
+    print(type(ans.mask_area_deg2))
+    print(type(ans.u_mask_area_pc2))
+    print(type(ans.u_dust_mass_Msun))
+
     return False, ans
 
 #--------------------------------------------
@@ -132,7 +146,7 @@ if __name__ == "__main__":
     result_table = np.zeros((len(levels), 5), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    u_distance = dist_lib.perseus_distance
+    u_distance = dist_lib.chamaeleon_2_distance
     # Estimate the cloud mass
     print("distance (pc): {0}".format(u_distance))
     prev_level = None
@@ -147,28 +161,26 @@ if __name__ == "__main__":
         new_result_set = None 
         Av_mask = np.where(Av > level)
         Failure, new_result_set = calc_cloud_mass(col, e_col, Av_mask, pix_area_in_deg2_col, u_distance)
-        if Failure:
-            continue
-        elif the_first:
+        if the_first:
             the_first = False
             print("-------------------------------")
             Av_range = "Av > {0}".format(level)
-            mask_area_deg2 = new_result_set.mask_area_deg2[0]
-            u_mask_area_pc2 = new_result_set.u_mask_area_pc2[0]
-            u_dust_mass_Msun = new_result_set.u_dust_mass_Msun[0]
+            mask_area_deg2 = new_result_set.mask_area_deg2
+            u_mask_area_pc2 = new_result_set.u_mask_area_pc2
+            u_dust_mass_Msun = new_result_set.u_dust_mass_Msun
         else:
             print("-------------------------------")
             Av_range = "{0} < Av <= {1} ".format(level, prev_level) 
-            mask_area_deg2 = new_result_set.mask_area_deg2[0] - prev_result_set.mask_area_deg2[0]
-            u_mask_area_pc2 =  new_result_set.u_mask_area_pc2[0] - prev_result_set.u_mask_area_pc2[0]
-            u_dust_mass_Msun = new_result_set.u_dust_mass_Msun[0] - prev_result_set.u_dust_mass_Msun[0]
+            mask_area_deg2 = new_result_set.mask_area_deg2 - prev_result_set.mask_area_deg2
+            u_mask_area_pc2 =  new_result_set.u_mask_area_pc2 - prev_result_set.u_mask_area_pc2
+            u_dust_mass_Msun = new_result_set.u_dust_mass_Msun - prev_result_set.u_dust_mass_Msun
         result_table[i, 0] = Av_range
         result_table[i, 1] = mask_area_deg2
         result_table[i, 2] = u_mask_area_pc2
         result_table[i, 3] = u_dust_mass_Msun
         result_table[i, 4] = u_distance
         print(Av_range)
-        print("mask_area_deg2: {0}".format(u_mask_area_deg2))
+        print("mask_area_deg2: {0}".format(mask_area_deg2))
         print("mask_area_pc2: {0}".format(u_mask_area_pc2))
         print("dust_mass_Msun: {0}".format(u_dust_mass_Msun))
             

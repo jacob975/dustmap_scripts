@@ -37,7 +37,7 @@ from astropy import units as u
 from input_lib import option_hp_cloud_pointer
 from hpproj import hp_project
 
-def hp_project_script(hp_hdu, e_hp_hdu, cnt_coord, cloud_ra_list, cloud_dec_list, shape_out, cloud_name): 
+def hp_project_script(hp_hdu, cnt_coord, cloud_ra_list, cloud_dec_list, shape_out, cloud_name): 
     #-------------------------------------------------
     # Cut a small piece from the map, taking LMC and SMC for example
     # examples of coordinates
@@ -48,14 +48,6 @@ def hp_project_script(hp_hdu, e_hp_hdu, cnt_coord, cloud_ra_list, cloud_dec_list
     pixsize = hp.nside2resol(hp_hdu.header['NSIDE'], arcmin=True) / 60 / 4
     hdu = hp_project(
         hp_hdu,
-        cnt_coord,
-        pixsize=pixsize, 
-        shape_out = shape_out,
-        #projection = ("EQUATORIAL", "TAN"),
-        projection = ("GALACTIC", "TAN"),
-    )
-    e_hdu = hp_project(
-        e_hp_hdu,
         cnt_coord,
         pixsize=pixsize, 
         shape_out = shape_out,
@@ -101,9 +93,7 @@ def hp_project_script(hp_hdu, e_hp_hdu, cnt_coord, cloud_ra_list, cloud_dec_list
     cbar = plt.colorbar(img, cax = cbar_ax, orientation="horizontal")
     cbar.set_label(hp_hdu.header['UNIT'], labelpad=15)
     plt.savefig("healpix_{0}.png".format(cloud_name))
-    #hdu.writeto("healpix_{0}.fits".format(cloud_name), overwrite = True)
-    u_hdu = fits.HDUList([fits.PrimaryHDU(), hdu, e_hdu])
-    u_hdu.writeto("healpix_{0}.fits".format(cloud_name), overwrite = True)
+    hdu.writeto("healpix_{0}.fits".format(cloud_name), overwrite = True)
     return
 
 def coord_np2sky(alpha, delta, frame):
@@ -148,17 +138,8 @@ if __name__ == "__main__":
         h = True,
         nest=None,
     )
-    e_DL07_paras, e_hp_header = hp.read_map(
-        map_name,
-        # field indicates which column you choose to load, starting from 0.
-        field = 1,
-        h = True,
-        nest=None,
-    )
     hp_hdu = fits.ImageHDU(DL07_paras, fits.Header(hp_header))
     hp_hdu.header['UNIT'] = r"$M_{sun}/kpc^2$"
-    e_hp_hdu = fits.ImageHDU(e_DL07_paras, fits.Header(e_hp_header))
-    e_hp_hdu.header['UNIT'] = r"$M_{sun}/kpc^2$"
     # Show the header of this map.
     hdul = fits.open(map_name)
     hdul.info()
@@ -194,7 +175,7 @@ if __name__ == "__main__":
     offset_array = np.array(offset_list, dtype = float)
     max_offset = np.amax(offset_array)
     print(max_offset)
-    size_pix_num = 2 * max_offset/pixsize + 350
+    size_pix_num = 2 * max_offset/pixsize + 100 
     #shape_out = (int(ds9_height), int(ds9_width))
     shape_out = (int(size_pix_num), int(size_pix_num))
     # Print the size information
@@ -210,7 +191,7 @@ if __name__ == "__main__":
     print("Minimum: {0}".format(min_DL07_paras))
     #-------------------------------------------------
     # Cut a small piece from the map, taking LMC and SMC for example
-    hp_project_script(hp_hdu, e_hp_hdu, center_coord, cloud_ra_list, cloud_dec_list, shape_out, cloud_name)
+    hp_project_script(hp_hdu, center_coord, cloud_ra_list, cloud_dec_list, shape_out, cloud_name)
     # Rename the option file
     new_name = 'healpix_{0}_option.txt'.format(cloud_name)
     cmd_line = 'cp {0} {1}'.format( 

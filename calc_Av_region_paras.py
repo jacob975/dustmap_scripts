@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 '''
 Abstract:
-    Calculate the Star Formation parameters from given data.
+    Calculate the Star Formation parameters from given data for certain extinction regions.
 Usage:
     calc_SF_paras.py [Given data]
 Output:
@@ -27,7 +27,7 @@ from sys import argv
 from os import system
 from uncertainties import ufloat, umath
 from input_lib import option_calc_SF_paras
-from chiu20_mysql_lib import save2sql_mq_cloud, mq_cloud_format, mq_cloud_name
+from chiu20_mysql_lib import save2sql_mq_av_region, mq_av_region_format, mq_av_region_name
 #--------------------------------------------
 # Main code
 if __name__ == "__main__":
@@ -212,92 +212,92 @@ if __name__ == "__main__":
     #-----------------------------------
     # Save to sql
     # Initialize two lists for outputs and keys.
-    data = list(-999*np.ones(len(mq_cloud_format)))
-    mq_cloud_format_keys = list(mq_cloud_format[:,0])
-    data[mq_cloud_format_keys.index('`cloud`')] = region_name
+    data = list(-999*np.ones(len(mq_av_region_format)))
+    mq_av_region_format_keys = list(mq_av_region_format[:,0])
+    data[mq_av_region_format_keys.index('`cloud`')] = region_name
     # Location and morphology of clouds
-    data[mq_cloud_format_keys.index('`l_deg`')] = l_deg
-    data[mq_cloud_format_keys.index('`b_deg`')] = b_deg
+    data[mq_av_region_format_keys.index('`l_deg`')] = l_deg
+    data[mq_av_region_format_keys.index('`b_deg`')] = b_deg
     # Number of YSO
-    data[mq_cloud_format_keys.index('`yso_number`')] = num_yso
-    data[mq_cloud_format_keys.index('`class_i_yso_number`')] = num_i
-    data[mq_cloud_format_keys.index('`class_f_yso_number`')] = num_f
+    data[mq_av_region_format_keys.index('`yso_number`')] = num_yso
+    data[mq_av_region_format_keys.index('`class_i_yso_number`')] = num_i
+    data[mq_av_region_format_keys.index('`class_f_yso_number`')] = num_f
     # YSO lifetime
-    data[mq_cloud_format_keys.index('`yso_lifetime_Myr`')] = u_avg_yso_lt.n
-    data[mq_cloud_format_keys.index('`e_yso_lifetime_Myr`')] = u_avg_yso_lt.s
-    data[mq_cloud_format_keys.index('`class_i_yso_lifetime_Myr`')] = u_avg_class_i_yso_lt.n
-    data[mq_cloud_format_keys.index('`e_class_i_yso_lifetime_Myr`')] = u_avg_class_i_yso_lt.s
-    data[mq_cloud_format_keys.index('`class_f_yso_lifetime_Myr`')] = u_avg_class_f_yso_lt.n
-    data[mq_cloud_format_keys.index('`e_class_f_yso_lifetime_Myr`')] = u_avg_class_f_yso_lt.s
+    data[mq_av_region_format_keys.index('`yso_lifetime_Myr`')] = u_avg_yso_lt.n
+    data[mq_av_region_format_keys.index('`e_yso_lifetime_Myr`')] = u_avg_yso_lt.s
+    data[mq_av_region_format_keys.index('`class_i_yso_lifetime_Myr`')] = u_avg_class_i_yso_lt.n
+    data[mq_av_region_format_keys.index('`e_class_i_yso_lifetime_Myr`')] = u_avg_class_i_yso_lt.s
+    data[mq_av_region_format_keys.index('`class_f_yso_lifetime_Myr`')] = u_avg_class_f_yso_lt.n
+    data[mq_av_region_format_keys.index('`e_class_f_yso_lifetime_Myr`')] = u_avg_class_f_yso_lt.s
     # YSO mass
-    data[mq_cloud_format_keys.index('`avg_yso_mass_Msun`')] = u_avg_yso_mass.n
-    data[mq_cloud_format_keys.index('`e_avg_yso_mass_Msun`')] = u_avg_yso_mass.s
-    data[mq_cloud_format_keys.index('`total_yso_mass_Msun`')] = u_total_yso_mass.n
-    data[mq_cloud_format_keys.index('`e_total_yso_mass_Msun`')] = u_total_yso_mass.s
-    data[mq_cloud_format_keys.index('`total_class_i_yso_mass_Msun`')] = u_total_class_i_yso_mass.n
-    data[mq_cloud_format_keys.index('`e_total_class_i_yso_mass_Msun`')] = u_total_class_i_yso_mass.s
-    data[mq_cloud_format_keys.index('`total_class_f_yso_mass_Msun`')] = u_total_class_f_yso_mass.n
-    data[mq_cloud_format_keys.index('`e_total_class_f_yso_mass_Msun`')] = u_total_class_f_yso_mass.s
+    data[mq_av_region_format_keys.index('`avg_yso_mass_Msun`')] = u_avg_yso_mass.n
+    data[mq_av_region_format_keys.index('`e_avg_yso_mass_Msun`')] = u_avg_yso_mass.s
+    data[mq_av_region_format_keys.index('`total_yso_mass_Msun`')] = u_total_yso_mass.n
+    data[mq_av_region_format_keys.index('`e_total_yso_mass_Msun`')] = u_total_yso_mass.s
+    data[mq_av_region_format_keys.index('`total_class_i_yso_mass_Msun`')] = u_total_class_i_yso_mass.n
+    data[mq_av_region_format_keys.index('`e_total_class_i_yso_mass_Msun`')] = u_total_class_i_yso_mass.s
+    data[mq_av_region_format_keys.index('`total_class_f_yso_mass_Msun`')] = u_total_class_f_yso_mass.n
+    data[mq_av_region_format_keys.index('`e_total_class_f_yso_mass_Msun`')] = u_total_class_f_yso_mass.s
     # Distance to the cloud
-    data[mq_cloud_format_keys.index('`distance_pc`')] = u_avg_cloud_distance.n
-    data[mq_cloud_format_keys.index('`e_distance_pc`')] = u_avg_cloud_distance.s
+    data[mq_av_region_format_keys.index('`distance_pc`')] = u_avg_cloud_distance.n
+    data[mq_av_region_format_keys.index('`e_distance_pc`')] = u_avg_cloud_distance.s
     # Surface area of the cloud
-    data[mq_cloud_format_keys.index('`area_deg2`')] = cloud_area_deg2
-    data[mq_cloud_format_keys.index('`area_pc2`')] = u_cloud_area_pc2.n
-    data[mq_cloud_format_keys.index('`e_area_pc2`')] = u_cloud_area_pc2.s
-    data[mq_cloud_format_keys.index('`yso_number_per_deg2`')] = num_yso_per_area_deg2
-    data[mq_cloud_format_keys.index('`yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`e_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`class_i_yso_number_per_deg2`')] = num_yso_per_area_deg2
-    data[mq_cloud_format_keys.index('`class_i_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`e_class_i_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`class_f_yso_number_per_deg2`')] = num_yso_per_area_deg2
-    data[mq_cloud_format_keys.index('`class_f_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`e_class_f_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`Av_threshold`')] = Av_threshold 
+    data[mq_av_region_format_keys.index('`area_deg2`')] = cloud_area_deg2
+    data[mq_av_region_format_keys.index('`area_pc2`')] = u_cloud_area_pc2.n
+    data[mq_av_region_format_keys.index('`e_area_pc2`')] = u_cloud_area_pc2.s
+    data[mq_av_region_format_keys.index('`yso_number_per_deg2`')] = num_yso_per_area_deg2
+    data[mq_av_region_format_keys.index('`yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
+    data[mq_av_region_format_keys.index('`e_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
+    data[mq_av_region_format_keys.index('`class_i_yso_number_per_deg2`')] = num_yso_per_area_deg2
+    data[mq_av_region_format_keys.index('`class_i_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
+    data[mq_av_region_format_keys.index('`e_class_i_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
+    data[mq_av_region_format_keys.index('`class_f_yso_number_per_deg2`')] = num_yso_per_area_deg2
+    data[mq_av_region_format_keys.index('`class_f_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
+    data[mq_av_region_format_keys.index('`e_class_f_yso_number_per_pc2`')] = u_num_yso_per_area_pc2.n
+    data[mq_av_region_format_keys.index('`Av_threshold`')] = Av_threshold 
     # Cloud mass derived from extinctions or dust emission
-    data[mq_cloud_format_keys.index('`cloud_mass_Msun`')] = u_cloud_mass.n
-    data[mq_cloud_format_keys.index('`e_cloud_mass_Msun`')] = u_cloud_mass.s
-    data[mq_cloud_format_keys.index('`cloud_surface_density_Msun_per_pc2`')] = \
+    data[mq_av_region_format_keys.index('`cloud_mass_Msun`')] = u_cloud_mass.n
+    data[mq_av_region_format_keys.index('`e_cloud_mass_Msun`')] = u_cloud_mass.s
+    data[mq_av_region_format_keys.index('`cloud_surface_density_Msun_per_pc2`')] = \
         u_cloud_surface_density.n 
-    data[mq_cloud_format_keys.index('`e_cloud_surface_density_Msun_per_pc2`')] = \
+    data[mq_av_region_format_keys.index('`e_cloud_surface_density_Msun_per_pc2`')] = \
         u_cloud_surface_density.s 
     # Star Formation Rate (SFR)
-    data[mq_cloud_format_keys.index('`sfr_Msun_per_Myr`')] = u_sfr.n
-    data[mq_cloud_format_keys.index('`e_sfr_Msun_per_Myr`')] = u_sfr.s
-    data[mq_cloud_format_keys.index('`sfr_I_Msun_per_Myr`')] = u_sfr_i.n
-    data[mq_cloud_format_keys.index('`e_sfr_I_Msun_per_Myr`')] = u_sfr_i.s
-    data[mq_cloud_format_keys.index('`sfr_F_Msun_per_Myr`')] = u_sfr_f.n
-    data[mq_cloud_format_keys.index('`e_sfr_F_Msun_per_Myr`')] = u_sfr_f.s
+    data[mq_av_region_format_keys.index('`sfr_Msun_per_Myr`')] = u_sfr.n
+    data[mq_av_region_format_keys.index('`e_sfr_Msun_per_Myr`')] = u_sfr.s
+    data[mq_av_region_format_keys.index('`sfr_I_Msun_per_Myr`')] = u_sfr_i.n
+    data[mq_av_region_format_keys.index('`e_sfr_I_Msun_per_Myr`')] = u_sfr_i.s
+    data[mq_av_region_format_keys.index('`sfr_F_Msun_per_Myr`')] = u_sfr_f.n
+    data[mq_av_region_format_keys.index('`e_sfr_F_Msun_per_Myr`')] = u_sfr_f.s
     # Star Formation Rate Density
-    data[mq_cloud_format_keys.index('`sfr_surface_density_Msun_per_Myr_pc2`')] = u_sfr_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`e_sfr_surface_density_Msun_per_Myr_pc2`')] = u_sfr_per_area_pc2.s
-    data[mq_cloud_format_keys.index('`flag_sfr_surface_density_Msun_per_Myr_pc2`')] = flag_sfr  
-    data[mq_cloud_format_keys.index('`sfr_I_surface_density_Msun_per_Myr_pc2`')] = \
+    data[mq_av_region_format_keys.index('`sfr_surface_density_Msun_per_Myr_pc2`')] = u_sfr_per_area_pc2.n
+    data[mq_av_region_format_keys.index('`e_sfr_surface_density_Msun_per_Myr_pc2`')] = u_sfr_per_area_pc2.s
+    data[mq_av_region_format_keys.index('`flag_sfr_surface_density_Msun_per_Myr_pc2`')] = flag_sfr  
+    data[mq_av_region_format_keys.index('`sfr_I_surface_density_Msun_per_Myr_pc2`')] = \
         u_sfr_i_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`e_sfr_I_surface_density_Msun_per_Myr_pc2`')] = \
+    data[mq_av_region_format_keys.index('`e_sfr_I_surface_density_Msun_per_Myr_pc2`')] = \
         u_sfr_i_per_area_pc2.s
-    data[mq_cloud_format_keys.index('`flag_sfr_I_surface_density_Msun_per_Myr_pc2`')] = flag_i_sfr 
-    data[mq_cloud_format_keys.index('`sfr_F_surface_density_Msun_per_Myr_pc2`')] = \
+    data[mq_av_region_format_keys.index('`flag_sfr_I_surface_density_Msun_per_Myr_pc2`')] = flag_i_sfr 
+    data[mq_av_region_format_keys.index('`sfr_F_surface_density_Msun_per_Myr_pc2`')] = \
         u_sfr_f_per_area_pc2.n
-    data[mq_cloud_format_keys.index('`e_sfr_F_surface_density_Msun_per_Myr_pc2`')] = \
+    data[mq_av_region_format_keys.index('`e_sfr_F_surface_density_Msun_per_Myr_pc2`')] = \
         u_sfr_f_per_area_pc2.s
-    data[mq_cloud_format_keys.index('`flag_sfr_F_surface_density_Msun_per_Myr_pc2`')] = flag_f_sfr 
+    data[mq_av_region_format_keys.index('`flag_sfr_F_surface_density_Msun_per_Myr_pc2`')] = flag_f_sfr 
     # Depletion time
-    data[mq_cloud_format_keys.index('`cloud_depletion_time_Myr`')] = u_cloud_t_dep.n
-    data[mq_cloud_format_keys.index('`e_cloud_depletion_time_Myr`')] = u_cloud_t_dep.s
-    data[mq_cloud_format_keys.index('`cloud_free_fall_time_Myr`')] = u_cloud_t_ff.n
-    data[mq_cloud_format_keys.index('`e_cloud_free_fall_time_Myr`')] = u_cloud_t_ff.s
-    data[mq_cloud_format_keys.index('`sfr_per_t_ff`')] = u_sfr_per_t_ff.n
-    data[mq_cloud_format_keys.index('`e_sfr_per_t_ff`')] = u_sfr_per_t_ff.s
+    data[mq_av_region_format_keys.index('`cloud_depletion_time_Myr`')] = u_cloud_t_dep.n
+    data[mq_av_region_format_keys.index('`e_cloud_depletion_time_Myr`')] = u_cloud_t_dep.s
+    data[mq_av_region_format_keys.index('`cloud_free_fall_time_Myr`')] = u_cloud_t_ff.n
+    data[mq_av_region_format_keys.index('`e_cloud_free_fall_time_Myr`')] = u_cloud_t_ff.s
+    data[mq_av_region_format_keys.index('`sfr_per_t_ff`')] = u_sfr_per_t_ff.n
+    data[mq_av_region_format_keys.index('`e_sfr_per_t_ff`')] = u_sfr_per_t_ff.s
     # Star Formation Efficiency (SFE)
-    data[mq_cloud_format_keys.index('`sfe`')] = u_sfe.n
-    data[mq_cloud_format_keys.index('`e_sfe`')] = u_sfe.s
+    data[mq_av_region_format_keys.index('`sfe`')] = u_sfe.n
+    data[mq_av_region_format_keys.index('`e_sfe`')] = u_sfe.s
     # Inut files and Assumptions
-    data[mq_cloud_format_keys.index('`input_file`')] = data_name 
-    data[mq_cloud_format_keys.index('`reference`')] = 'Chiu, Yi-Lung' 
-    data[mq_cloud_format_keys.index('`comments`')] = comments
-    save2sql_mq_cloud(data)
+    data[mq_av_region_format_keys.index('`input_file`')] = data_name 
+    data[mq_av_region_format_keys.index('`reference`')] = 'Chiu, Yi-Lung' 
+    data[mq_av_region_format_keys.index('`comments`')] = comments
+    save2sql_mq_av_region(data)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
