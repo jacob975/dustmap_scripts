@@ -126,7 +126,7 @@ class option_calc_SF_paras(inp_option):
             "250",
             "50",
             "# Av threshold used to defined the cloud region (mag)",
-            "Av >= 4",
+            "Av>=4",
             "#----------------------------------------",
             "# Comments",
             "#----------------------------------------",

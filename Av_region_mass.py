@@ -81,19 +81,12 @@ def calc_cloud_mass(col, e_col, mask, pix_area_deg2, u_distance_pc):
     max_selected_col = np.max(selected_col)
     num_of_pixel = len(selected_col)
     mask_area_deg2 = pix_area_deg2 * len(selected_col)
-
     ans.update(
         u_distance_pc, 
         mask_area_deg2, 
         u_mask_area_pc2, 
         u_dust_mass_Msun
     )
-    
-    print(type(ans.u_distance_pc))
-    print(type(ans.mask_area_deg2))
-    print(type(ans.u_mask_area_pc2))
-    print(type(ans.u_dust_mass_Msun))
-
     return False, ans
 
 #--------------------------------------------
@@ -146,7 +139,8 @@ if __name__ == "__main__":
     result_table = np.zeros((len(levels), 5), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    u_distance = dist_lib.chamaeleon_2_distance
+    u_distance = dist_lib.serpens_distance
+
     # Estimate the cloud mass
     print("distance (pc): {0}".format(u_distance))
     prev_level = None

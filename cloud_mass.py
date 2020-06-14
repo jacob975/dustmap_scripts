@@ -102,7 +102,7 @@ if __name__ == "__main__":
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
     #--------------------------------------------
     # Given cloud distance
-    u_distance = dist_lib.lupus_distance
+    u_distance = dist_lib.serpens_distance
     # Estimate the cloud mass
     print("distance (pc): {0}".format(u_distance))
     levels = [2, 4, 6, 9, 12, 22] 
