@@ -42,6 +42,7 @@ def sed_to_alpha(sed, Q):
     alpha = 0.0
     spitzer_system = convert_lib.set_SCAO()
     band_name_list = [
+        'K',
         'IR1',
         'IR2',
         'IR3',
@@ -55,11 +56,11 @@ def sed_to_alpha(sed, Q):
     # Make lambda and flux*lambda list
     for i, band_name in enumerate(band_name_list):    
         # Choose the band that detected.
-        if Q[3+i] != 'A':
+        if Q[2+i] != 'A':
             continue
         # Index start at 3 because we skip band J, H, and K.
-        band_flux = sed[3+i]
-        e_band_flux = sed[8+3+i]
+        band_flux = sed[2+i]
+        e_band_flux = sed[8+2+i]
         wavelength = 10*spitzer_system[band_name][1] # um
         # Specific freq. to specific flux
         cvt = cs / (wavelength**2) # cm-1 s-1

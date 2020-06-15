@@ -58,31 +58,50 @@ def sed_to_L_mir(sed, Q, d):
 #------------------------------------------------
 # TODO
 # Skip band-filled value to prevent artifacts.
+
 def sed_to_alpha(sed, Q):
     # Initialize
-    alpha = 0
-    spitzer_system = convert_lib.set_spitzer()
-    # Load data
-    IR1 = sed[3]
-    IR2 = sed[4]
-    IR3 = sed[5]
-    IR4 = sed[6]
-    MP1 = sed[7]
-    log_l_F = [
-        np.log10(spitzer_system['IR1'][1] * IR1),
-        np.log10(spitzer_system['IR2'][1] * IR2),
-        np.log10(spitzer_system['IR3'][1] * IR3),
-        np.log10(spitzer_system['IR4'][1] * IR4),
-        np.log10(spitzer_system['MP1'][1] * MP1),
+    cs = 3e10 # cm s-1
+    alpha = 0.0
+    spitzer_system = convert_lib.set_SCAO()
+    band_name_list = [
+        'J',
+        'H',
+        'K',
+        'IR1',
+        'IR2',
+        'IR3',
+        'IR4',
+        'MP1',
     ]
-    log_l = [
-        np.log10(spitzer_system['IR1'][1]),
-        np.log10(spitzer_system['IR2'][1]),
-        np.log10(spitzer_system['IR3'][1]),
-        np.log10(spitzer_system['IR4'][1]),
-        np.log10(spitzer_system['MP1'][1]),
-    ]
-    paras = np.polyfit(log_l, log_l_F, 1)
+    log_l_F = []
+    e_log_l_F = []
+    log_l = []
+    yso_class = ''
+    # Make lambda and flux*lambda list
+    for i, band_name in enumerate(band_name_list):    
+        # Choose the band that detected.
+        if Q[i] != 'A' and Q[i] != 'S':
+            continue
+        # Index start at 3 because we skip band J, H, and K.
+        band_flux = sed[i]
+        e_band_flux = sed[8+i]
+        wavelength = 10*spitzer_system[band_name][1] # um
+        # Specific freq. to specific flux
+        cvt = cs / (wavelength**2) # cm-1 s-1
+        log_l_F.append(np.log(wavelength * cvt * band_flux))
+        e_log_l_F.append(np.log(wavelength * (e_band_flux+band_flux)/band_flux))
+        log_l.append(np.log(wavelength)) 
+    print(log_l_F)
+    print(log_l)
+    print(e_log_l_F)
+    w_log_l_F = np.divide(1, np.array(e_log_l_F))
+    paras = np.polyfit(
+        x = log_l_F, 
+        y = log_l, 
+        deg = 1, 
+        w = w_log_l_F
+    )
     alpha = paras[0]
     # Plot the result for debugging
     '''
