@@ -38,8 +38,9 @@ from matplotlib import pyplot as plt
 # Skip band-filled value to prevent artifacts.
 def sed_to_alpha(sed, Q):
     # Initialize
+    cs = 3e10 # cm s-1
     alpha = 0.0
-    spitzer_system = convert_lib.set_spitzer()
+    spitzer_system = convert_lib.set_SCAO()
     band_name_list = [
         'IR1',
         'IR2',
@@ -59,12 +60,15 @@ def sed_to_alpha(sed, Q):
         # Index start at 3 because we skip band J, H, and K.
         band_flux = sed[3+i]
         e_band_flux = sed[8+3+i]
-        log_l_F.append(np.log10(spitzer_system[band_name][1] * band_flux))
-        e_log_l_F.append(np.log10(spitzer_system[band_name][1] * (e_band_flux+band_flux)/band_flux))
-        log_l.append(np.log10(spitzer_system[band_name][1])) 
+        wavelength = 10*spitzer_system[band_name][1] # um
+        # Specific freq. to specific flux
+        cvt = cs / (wavelength**2) # cm-1 s-1
+        log_l_F.append(np.log(wavelength * cvt * band_flux))
+        e_log_l_F.append(np.log(wavelength * (e_band_flux+band_flux)/band_flux))
+        log_l.append(np.log(wavelength)) 
     w_log_l_F = np.divide(1, np.array(e_log_l_F))
     try:
-        paras = np.polyfit(log_l, log_l_F, 1, w = w_log_l_F)
+        paras = np.polyfit(log_l_F, log_l, 1, w = w_log_l_F)
     except:
         exit()
     # Calculate alpha and derive yso class

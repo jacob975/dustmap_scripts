@@ -73,16 +73,16 @@ if __name__ == "__main__":
         xerr = e_gas_sigma_cloud,
         y = sfr_sigma_cloud,
         yerr = e_sfr_sigma_cloud,
-        label='My works (clouds)',
-        fmt = 'o',
+        label='My works (c2d clouds, considering all YSO)',
+        fmt = 'ro',
     )
     ax.errorbar(
         x = gas_sigma_Av_regions,
         xerr = e_gas_sigma_Av_regions,
         y = sfr_sigma_Av_regions,
         yerr = e_sfr_sigma_Av_regions,
-        label='My works (regions)',
-        fmt = 'o',
+        label='My works (c2d Av regions, considering all YSO)',
+        fmt = 'bo',
     )
         
     #--------------------------------------------
@@ -150,7 +150,9 @@ if __name__ == "__main__":
     ax.scatter(
         Heiderman_gas_sigma, 
         Heiderman_sfr_sigma, 
-        label = 'Heiderman+10 (c2d Av regions)')
+        label = 'Heiderman+10 (c2d Av regions, considering I and Flat YSO)',
+        color = 'g',
+    )
     #-------------
     # Kennicutt+98
     # K-S relation
