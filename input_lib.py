@@ -153,11 +153,11 @@ class option_Av_region_paras(inp_option):
             s = [
                 "# The Av list used to define contours from little to large."
                 "# ex. : 2 4 6 12 22",
-                "2   4   6   9  12  22",
+                "0.1    2   4   6   9  12  22",
                 "# The contour linewidth",
-                "2 1.5 1.5 1.5 1.5 1.5",
+                "2      2 1.5 1.5 1.5 1.5 1.5",
                 "# The contour colors",
-                "k   r   k   k   b   k",
+                "k      k   r   k   k   b   k",
             ]
             np.savetxt(self.default_name, s, fmt = '%s')
             return
@@ -165,4 +165,26 @@ class option_Av_region_paras(inp_option):
             return
     def load(self, file_name):
         self.opts = np.loadtxt(file_name, dtype = str)
+        return self.opts
+
+class option_avg_distance(inp_option):
+    def create(self):
+        # Create the option file if it doesn't exist.
+        try:
+            np.loadtxt(self.default_name, dtype = str)
+        except:
+            s = [
+                "# One row represents the distance of a region.",
+                "# ex. 1064 53",
+                "# You can put more than one region below.",
+                "1064 53",
+                "1046 52",
+            ]
+            np.savetxt(self.default_name, s, fmt = '%s')
+            return
+        else:
+            return
+    def load(self, file_name):
+        self.opts = np.loadtxt(file_name, dtype = float)
+        self.opts = self.opts.reshape((-1, 2))
         return self.opts

@@ -28,6 +28,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from chiu20_mysql_lib import load2py_mq_cloud
+from Heiderman10_lib import Heiderman_cloud, index_HC
 #--------------------------------------------
 # Main code
 if __name__ == "__main__":
@@ -41,64 +42,53 @@ if __name__ == "__main__":
         exit()
     #--------------------------------------------
     # Initialization
-    col_list = [
-        '`cloud_surface_density_Msun_per_pc2`', 
-        '`sfr_surface_density_Msun_per_Myr_pc2`'
+    YSO_col_list = [
+        '`cloud_surface_density_Msun_per_pc2`',
+        '`e_cloud_surface_density_Msun_per_pc2`',
+        '`sfr_surface_density_Msun_per_Myr_pc2`',
+        '`e_sfr_surface_density_Msun_per_Myr_pc2`',
+        '`flag_sfr_surface_density_Msun_per_Myr_pc2`',
     ]
-    col_list_str = '|'.join(col_list)
+    col_list_str = '|'.join(YSO_col_list)
     # Obtain data from SQL
-    data = load2py_mq_cloud(col_list)
-    data = np.array(data, dtype=float)
-    gas_sigma_c2d_gould_belt = data[:20,0]
-    sfr_sigma_c2d_gould_belt = data[:20,1]
-    gas_sigma_others = data[20:52,0]
-    sfr_sigma_others = data[20:52,1]
+    c2d_gould_belt_data = load2py_mq_cloud(YSO_col_list)
+    c2d_gould_belt_data = np.array(c2d_gould_belt_data, dtype=object)
+    gas_sigma_c2d_gould_belt =       np.array(c2d_gould_belt_data[:,0], dtype = float)
+    e_gas_sigma_c2d_gould_belt =     np.array(c2d_gould_belt_data[:,1], dtype = float)
+    sfr_sigma_c2d_gould_belt =       np.array(c2d_gould_belt_data[:,2], dtype = float)
+    e_sfr_sigma_c2d_gould_belt =     np.array(c2d_gould_belt_data[:,3], dtype = float)
+    flag_sfr_sigma_c2d_gould_belt =  np.array(c2d_gould_belt_data[:,4], dtype = str)
+    index_U_c2d_gould_belt = flag_sfr_sigma_c2d_gould_belt == 'U'
     #--------------------------------------------
     # Plot the figure
     fig, ax = plt.subplots(figsize = (8,8))
-    ax.scatter(
-        gas_sigma_c2d_gould_belt, 
-        sfr_sigma_c2d_gould_belt, 
-        label='My works (clouds from c2d, Gould belt)'
-    )
-    ax.scatter(
-        gas_sigma_others, 
-        sfr_sigma_others, 
-        label='My works (clouds from Zucker+20)'
+    ax.errorbar(
+        x = gas_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
+        xerr = e_gas_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
+        y = sfr_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
+        yerr = e_sfr_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
+        label = 'c2d and Gould belt clouds',
+        color = 'b',
+        fmt = 'o',
     )
     #--------------------------------------------
     # Additional data
     #-------------
     # Heiderman+10
-    Heiderman_cloud = np.array([
-    # Cloud, gas_sigma, sfr_sigma
-        [ 'Cha II  ', 64.3, 0.605],
-        [ 'Lup I   ', 57.9, 0.367],
-        [ 'Lup III ', 59.2, 1.10],
-        [ 'Lup IV  ', 75.0, 1.19],
-        [ 'Oph     ', 105 , 2.45],
-        [ 'Per     ', 90.0, 1.31],
-        [ 'Ser     ', 138 , 3.29],
-        [ 'AurN    ', 92.9, 0.207],
-        [ 'Aur     ', 92.4, 0.854],
-        [ 'Cep     ', 68.7, 0.776],
-        [ 'Cha III ', 47.5, 0.0357],
-        [ 'Cha I   ', 91.1, 2.36],
-        [ 'CrA     ', 92.1, 3.37],
-        [ 'IC5146E ', 54.9, 0.378],
-        [ 'IC5146NW', 59.1, 0.108],
-        [ 'Lup VI  ', 67.5, 1.66],
-        [ 'Lup V   ', 60.3, 0.915],
-        [ 'Mus     ', 49.1, 0.440],
-        [ 'Sco     ', 85.2, 0.343],
-        [ 'Ser-Aqu ', 136 , 2.01],
-    ], dtype = object)
-    Heiderman_gas_sigma = np.array(Heiderman_cloud[:,1], dtype = float)
-    Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,2], dtype = float)
-    ax.scatter(
-        Heiderman_gas_sigma, 
-        Heiderman_sfr_sigma, 
-        label = 'Heiderman+10 (c2d, Gould belt)')
+    #TODO
+    Heiderman_gas_sigma = np.array(Heiderman_cloud[:,index_HC.index('gas_sigma')], dtype = float)
+    e_Heiderman_gas_sigma = np.array(Heiderman_cloud[:,index_HC.index('e_gas_sigma')], dtype = float)
+    Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,index_HC.index('sfr_sigma')], dtype = float)
+    e_Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,index_HC.index('e_sfr_sigma')], dtype = float)
+    ax.errorbar(
+        x = Heiderman_gas_sigma,
+        xerr = e_Heiderman_gas_sigma,
+        y = Heiderman_sfr_sigma, 
+        yerr = e_Heiderman_sfr_sigma,
+        label = 'Heiderman+10 (c2d and Gould belt clouds)',
+        color = 'g',
+        fmt = 'o',
+    )
     #-------------
     # Kennicutt+98
     # K-S relation

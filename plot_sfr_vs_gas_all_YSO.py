@@ -85,7 +85,7 @@ if __name__ == "__main__":
         xerr = e_gas_sigma_class_I[~index_U_class_I],
         y = sfr_sigma_class_I[~index_U_class_I],
         yerr = e_sfr_sigma_class_I[~index_U_class_I],
-        label='My works (c2d Class I)',
+        label= 'Class I YSO',
         color = 'b',
         fmt = 'o'
     )
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     ax.scatter(
         x = gas_sigma_class_I[index_U_class_I],
         y = sfr_sigma_class_I[index_U_class_I],
-        label='My works (c2d Class I upper limits)', 
+        label='Class I YSO upper limit', 
         marker = 'v',
         color = 'b',
         alpha = 0.5,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         xerr = e_gas_sigma_class_F[~index_U_class_F],
         y = sfr_sigma_class_F[~index_U_class_F],
         yerr = e_sfr_sigma_class_F[~index_U_class_F],
-        label='My works (c2d Class F)',
+        label='Class Flat YSO',
         color = 'm',
         fmt = 'o'
     )
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     ax.scatter(
         x = gas_sigma_class_F[index_U_class_F],
         y = sfr_sigma_class_F[index_U_class_F],
-        label='My works (c2d Class F upper limits)', 
+        label='Class Flat YSO upper limit', 
         marker = 'v',
         color = 'm',
         alpha = 0.5,
@@ -127,18 +127,18 @@ if __name__ == "__main__":
     Heiderman_sfr_sigma_class_i = np.array(Heiderman_Av_regions_class_i[:,2], dtype = float)
     Heiderman_gas_sigma_class_f = np.array(Heiderman_Av_regions_class_f[:,1], dtype = float)
     Heiderman_sfr_sigma_class_f = np.array(Heiderman_Av_regions_class_f[:,2], dtype = float)
-    ax.scatter(
-        Heiderman_gas_sigma_class_i, 
-        Heiderman_sfr_sigma_class_i, 
-        label = 'Heiderman+10 (c2d class I)', 
-        color = 'g',
-    )
-    ax.scatter(
-        Heiderman_gas_sigma_class_f, 
-        Heiderman_sfr_sigma_class_f, 
-        label = 'Heiderman+10 (c2d class F)', 
-        color = 'c',
-    )
+    #ax.scatter(
+    #    Heiderman_gas_sigma_class_i, 
+    #    Heiderman_sfr_sigma_class_i, 
+    #    label = 'Heiderman+10 (c2d class I)', 
+    #    color = 'g',
+    #)
+    #ax.scatter(
+    #    Heiderman_gas_sigma_class_f, 
+    #    Heiderman_sfr_sigma_class_f, 
+    #    label = 'Heiderman+10 (c2d class F)', 
+    #    color = 'c',
+    #)
     #-------------
     # Kennicutt+98
     # K-S relation

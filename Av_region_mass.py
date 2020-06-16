@@ -3,7 +3,7 @@
 Abstract:
     This is a program to calculate the cloud mass based on column density map and extintion map.
 Usage:
-    Av_region_mass.py [contour config] [column density map] [extinction map]
+    Av_region_mass.py [contour config] [cloud_name] [column density map] [extinction map]
     column density map unit: M_sun / kpc^2
     extinction map unit: Av in mag
 Output:
@@ -101,14 +101,15 @@ if __name__ == "__main__":
     aa = option_Av_region_paras(default_contour_config_name)
     #-----------------------------------
     # Load argv
-    if len(argv) != 4:
+    if len(argv) != 5:
         print ("The number of arguments is wrong.")
-        print ("Usage:  Av_region_mass.py [contour config] [column density map] [extinction map]") 
+        print ("Usage:  Av_region_mass.py [contour config] [cloud_name] [column density map] [extinction map]") 
         aa.create()
         exit()
     contour_config_name = argv[1]
-    col_den_name = argv[2]
-    Av_name = argv[3]
+    cloud_name = argv[2]
+    col_den_name = argv[3]
+    Av_name = argv[4]
     print("Arguments:\n{0}".format(argv))
     #--------------------------------------------
     # Load image
@@ -139,8 +140,7 @@ if __name__ == "__main__":
     result_table = np.zeros((len(levels), 5), dtype = object)
     #--------------------------------------------
     # Given cloud distance
-    u_distance = dist_lib.serpens_distance
-
+    u_distance = dist_lib.distance_dict[cloud_name]
     # Estimate the cloud mass
     print("distance (pc): {0}".format(u_distance))
     prev_level = None
