@@ -52,9 +52,13 @@ if __name__ == "__main__":
     num_regions = len(distance_table)
     print(distance_table)
     # Calculate the average distance
-    u_distance_table = unumpy.uarray(distance_table[:,0], distance_table[:,1])
-    u_distance = u_distance_table.sum() / num_regions
-    print(u_distance)
+    max_e_distance = np.max(distance_table[:,1])
+    max_diff_distance = np.max(distance_table[:,0]) - np.min(distance_table[:,0])
+    print(max_e_distance)
+    print(max_diff_distance)
+    distance_tot = np.mean(distance_table[:,0])
+    e_distance_tot = np.sqrt(max_e_distance**2 + max_diff_distance**2)
+    print(r'%f$\pm$%f (pc)' % (distance_tot, e_distance_tot))
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

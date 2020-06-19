@@ -25,6 +25,7 @@ update log
 '''
 import time
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import numpy as np
 import healpy as hp
 from sys import argv
@@ -65,10 +66,27 @@ def hp_project_script(hp_hdu, e_hp_hdu, coord, shape_out, cloud_name):
     plt.title("Cloud {0})".format(cloud_name))
     cut_data = hdu.data
     cut_w = WCS(hdu.header)
-    fig = plt.subplot(111, projection = cut_w)
-    ax = plt.imshow(cut_data)
-    cbar = plt.colorbar(ax)
-    cbar.set_label(hp_hdu.header['UNIT'], rotation=270, labelpad=15)
+    fig = plt.figure(figsize = (6,6))
+    ax = fig.add_axes([0.09, 0.16, 0.84, 0.70], projection = cut_w)
+    img = plt.imshow(
+        cut_data,
+        norm = LogNorm(
+            vmax = np.max(cut_data),
+            vmin = np.min(cut_data)
+        )
+    )
+    ax.set_xlabel('Right Ascention')
+    ax.set_ylabel('Declination')
+    plt.grid(color='white', ls='solid')
+    # Draw galactic coordinate
+    overlay = ax.get_coords_overlay('galactic')
+    overlay.grid(color='white', ls='dotted')
+    overlay[0].set_axislabel('Galactic longitude')
+    overlay[1].set_axislabel('Galactic Latitude')
+    # Set colorbar
+    cbar_ax = fig.add_axes([0.09, 0.06, 0.84, 0.02])
+    cbar = plt.colorbar(img, cax = cbar_ax, orientation = "horizontal")
+    cbar.set_label(hp_hdu.header['UNIT'], labelpad=15)
     plt.savefig("healpix_{0}.png".format(cloud_name))
     u_hdu = fits.HDUList([fits.PrimaryHDU(), hdu, e_hdu])
     u_hdu.writeto("healpix_{0}.fits".format(cloud_name), overwrite = True)

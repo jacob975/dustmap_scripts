@@ -185,7 +185,7 @@ if __name__ == "__main__":
     #--------------------------------------------
     # Save the result
     print(result_table)
-    np.save("Av_region_mass", result_table) 
+    np.save("Av_region_mass_{0}".format(cloud_name), result_table) 
     #--------------------------------------------
     # Plot the contour
     levels = levels[::-1]

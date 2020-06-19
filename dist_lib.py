@@ -1,6 +1,13 @@
 #!/usr/bin/python3
 from uncertainties import ufloat
 
+# 20200619
+# I calculate the distance from 
+# 1. For c2d and Gould belt regions, I use the distance mentioned in Heiderman+10
+# 2. For other regions, I use the average distance in Zucker+10.
+# And if the region is composed of several parts and their distance are measured individually, we estimate the overall distance by average the distance of these parts.
+# In addition, we define the uncertainty of the overall distance to be the sqare root of the largest distance uncertainty and the longest distance difference in these parts.
+
 #--------------------------------------------
 # Given cloud distance
 distance_dict = {
@@ -20,28 +27,33 @@ distance_dict = {
     "cepheus": ufloat(300, 30),
     "corona_australis": ufloat(130, 25),
     "ic5146": ufloat(950, 80),
+    # TODO
+    # I need to update the Av contour above.
     "musca": ufloat(160, 20),
     "scorpius": ufloat(130, 15),
     #--------------
     # Zucker+20 provides:
     "ara": ufloat(1050, 40),
-    "cb28": 398,
-    "cb29": 374,
-    "cb34": 1322,
-    "cma_ob1": 1169,
-    "california": 436,
-    "cam": 235, # Camelopardalis
-    "carina": 2500,
-    "gem_ob1": 1865,
-    "hercules_3": 230,
-    "ic1396": 916,
-    "ic2118": 328,
-    "l1228": 366 ,
-    "l1228d": 491,
-    "l1251": 351,
-    "l1293": 1083,
-    "l1306_2": 941,
-    "l1307_2": 902,
+    #"cb28": 398,
+    #"cb29": 374,
+    "cb34": ufloat(1322, 66),
+    #"cma_ob1": 1169,
+    "california": ufloat(452, 13),
+    #"cam": 235, # Camelopardalis
+    "carina": ufloat(2500, 120),
+    "carina_north": ufloat(2530, 180),
+    # TODO
+    # I need to update the uncertainties of distance above.
+    "gem_ob1_south": ufloat(1848, 314),
+    #"hercules_3": 230,
+    "ic1396_1": ufloat(916, 45),
+    "ic2118": ufloat(294, 57),
+    "l1228": ufloat(366, 18),
+    #"l1228d": 491,
+    "l1251": ufloat(351, 17),
+    #"l1293": 1083,
+    #"l1306_2": 941,
+    "l1307_2": ufloat(902, 45),
     "l1333": 283,
     "l1335": 647,
     "l1340": 858,
@@ -72,5 +84,5 @@ distance_dict = {
     "taurus": 147,
     "w3": 1873,
     "w5": 2026,
-    "cygnus_x": 1272,
+    "cygnus_x": ufloat(1164, 22),
 }

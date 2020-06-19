@@ -45,6 +45,20 @@ class cloud_yso_set():
         self.class_i_yso_number = 0
         self.class_f_yso_number = 0
 
+def is_insided_the_image(pixel_array, image_shape):
+    # if no points, nothing to do
+    if pixel_array.size == 0:
+        return pixel_array
+    # Take the points inside the image.
+    pixel_insided_index = np.where(
+        (pixel_array[:,0] >= 0) &
+        (pixel_array[:,0] < image_shape[1]) &
+        (pixel_array[:,1] >= 0) &
+        (pixel_array[:,1] < image_shape[0])
+    )
+    pixel_insided_array = pixel_array[pixel_insided_index]
+    return pixel_insided_array
+
 def calc_yso_number(
         yso_pixel_array, 
         class_i_pixel_array, 
@@ -113,7 +127,8 @@ if __name__ == "__main__":
     cls_pred = np.loadtxt(cls_pred_name, dtype = int)
     yso_class = np.loadtxt(yso_class_name, dtype = object)
     hdu_Av = fits.open(Av_name)
-    Av = hdu_Av[1].data 
+    Av = hdu_Av[1].data
+    Av_shape = Av.shape
     h_Av = hdu_Av[1].header 
     w_Av = WCS(h_Av)
     # Obtain the index of YSO
@@ -143,6 +158,15 @@ if __name__ == "__main__":
     # Result hosts
     # Av_range, YSO_num, Class_I_YSO_num, Class_F_YSO_num
     result_table = np.zeros((len(levels), 4), dtype = object)
+    # Convert from world coord to pixel coord, and select YSOs inside the image.
+    yso_pixel = np.array(np.round(w_Av.wcs_world2pix(yso_coord, 0)), dtype = int)
+    yso_pixel = is_insided_the_image(yso_pixel, Av_shape)
+
+    class_i_yso_pixel = np.array(np.round(w_Av.wcs_world2pix(class_i_yso_coord, 0)), dtype = int)
+    class_i_yso_pixel = is_insided_the_image(class_i_yso_pixel, Av_shape) 
+    
+    class_f_yso_pixel = np.array(np.round(w_Av.wcs_world2pix(class_f_yso_coord, 0)), dtype = int)
+    class_f_yso_pixel = is_insided_the_image(class_f_yso_pixel, Av_shape)
     #--------------------------------------------
     # Calculate the number of YSO in certain Av range 
     prev_level = None
@@ -157,10 +181,7 @@ if __name__ == "__main__":
         num_yso = None
         num_i = None
         num_f = None
-        # Renew the results
-        yso_pixel = np.array(np.round(w_Av.wcs_world2pix(yso_coord, 0)), dtype = int)
-        class_i_yso_pixel = np.array(np.round(w_Av.wcs_world2pix(class_i_yso_coord, 0)), dtype = int)
-        class_f_yso_pixel = np.array(np.round(w_Av.wcs_world2pix(class_f_yso_coord, 0)), dtype = int)
+        # Renew the results 
         Failure, new_result_set = calc_yso_number(
             yso_pixel, 
             class_i_yso_pixel, 
