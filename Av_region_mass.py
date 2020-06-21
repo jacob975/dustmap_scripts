@@ -208,7 +208,7 @@ if __name__ == "__main__":
         linewidths = linewidths,
         colors = colors,   
     )
-    plt.savefig("{0}_Av_contour.png".format(col_den_name[:-5]))
+    plt.savefig("{0}_Av_contour.png".format(col_den_name[:-5]), dpi = 300)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

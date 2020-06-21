@@ -194,7 +194,7 @@ if __name__ == "__main__":
     offset_array = np.array(offset_list, dtype = float)
     max_offset = np.amax(offset_array)
     print(max_offset)
-    size_pix_num = 2 * max_offset/pixsize + 60 
+    size_pix_num = 2 * max_offset/pixsize + 150 
     #shape_out = (int(ds9_height), int(ds9_width))
     shape_out = (int(size_pix_num), int(size_pix_num))
     # Print the size information

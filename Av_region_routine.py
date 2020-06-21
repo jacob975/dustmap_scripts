@@ -52,9 +52,6 @@ if __name__ == "__main__":
     # Load data
     # Load detail options from option file.
     options = aa.load(option_name)
-    
-    print(options)
-
     region_name = options[0]
     l_deg = options[1] # deg
     b_deg = options[2] # deg
