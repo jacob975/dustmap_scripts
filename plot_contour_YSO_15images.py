@@ -45,7 +45,7 @@ import dist_lib
 def is_insided_the_image(pixel_array, class_array, image_shape):
     # if no points, nothing to do
     if pixel_array.size == 0:
-        return pixel_array
+        return pixel_array, class_array
     # Take the points inside the image.
     pixel_insided_index = np.where(
         (pixel_array[:,0] >= 0) &
@@ -83,74 +83,6 @@ def plot_star_forming_region(fig, gs_iterator, arguments):
     coord_array = np.loadtxt(coord_name, dtype= float)
     cls_pred_array = np.loadtxt(cls_pred_name, dtype = int)
     class_array = np.loadtxt(yso_class_name, dtype = object)
-    yso_index = np.where(cls_pred_array == 2)[0]
-    class_i_yso_index = np.where((cls_pred_array == 2) & (class_array == 'I'))
-    class_f_yso_index = np.where((cls_pred_array == 2) & (class_array == 'Flat'))
-    class_ii_yso_index = np.where((cls_pred_array == 2) & (class_array == 'II'))
-    class_iii_yso_index = np.where((cls_pred_array == 2) & (class_array == 'III'))
-    if h_Av['CTYPE1'][:4] == 'GLON':
-        yso_coord_array =           icrs2galactic(coord_array[yso_index]          ) 
-        class_i_yso_coord_array =   icrs2galactic(coord_array[class_i_yso_index]  ) 
-        class_f_yso_coord_array =   icrs2galactic(coord_array[class_f_yso_index]  ) 
-        class_ii_yso_coord_array =  icrs2galactic(coord_array[class_ii_yso_index] ) 
-        class_iii_yso_coord_array = icrs2galactic(coord_array[class_iii_yso_index]) 
-    else:
-        yso_coord_array =           coord_array[yso_index]           
-        class_i_yso_coord_array =   coord_array[class_i_yso_index]   
-        class_f_yso_coord_array =   coord_array[class_f_yso_index]   
-        class_ii_yso_coord_array =  coord_array[class_ii_yso_index]  
-        class_iii_yso_coord_array = coord_array[class_iii_yso_index] 
-    # Convert the world coordinate the pixel coordinate    
-    yso_pixel_array = np.array(np.round(
-        w_Av.wcs_world2pix(yso_coord_array, 0)), 
-        dtype = int
-    )
-    class_i_yso_pixel_array = np.array(np.round(
-        w_Av.wcs_world2pix(class_i_yso_coord_array, 0)), 
-        dtype = int
-    )
-    class_f_yso_pixel_array = np.array(np.round(
-        w_Av.wcs_world2pix(class_f_yso_coord_array, 0)), 
-        dtype = int
-    )
-    class_ii_yso_pixel_array = np.array(np.round(
-        w_Av.wcs_world2pix(class_ii_yso_coord_array, 0)), 
-        dtype = int
-    )
-    class_iii_yso_pixel_array = np.array(np.round(
-        w_Av.wcs_world2pix(class_iii_yso_coord_array, 0)), 
-        dtype = int
-    )
-    yso_class_array = class_array[yso_index]
-    class_i_yso_class_array = class_array[class_i_yso_index]
-    class_f_yso_class_array = class_array[class_f_yso_index]
-    class_ii_yso_class_array = class_array[class_ii_yso_index]
-    class_iii_yso_class_array = class_array[class_iii_yso_index]
-    on_image_yso_pixel_array, on_image_yso_class_array = is_insided_the_image(
-        yso_pixel_array, 
-        yso_class_array,
-        Av_shape,
-    )
-    on_image_class_i_yso_pixel_array, on_image_class_i_yso_class_array = is_insided_the_image(
-        class_i_yso_pixel_array, 
-        class_i_yso_class_array,
-        Av_shape,
-    )
-    on_image_class_f_yso_pixel_array, on_image_class_f_yso_class_array = is_insided_the_image(
-        class_f_yso_pixel_array, 
-        class_f_yso_class_array,
-        Av_shape,
-    )
-    on_image_class_ii_yso_pixel_array, on_image_class_ii_yso_class_array = is_insided_the_image(
-        class_ii_yso_pixel_array, 
-        class_ii_yso_class_array,
-        Av_shape,
-    )
-    on_image_class_iii_yso_pixel_array, on_image_class_iii_yso_class_array = is_insided_the_image(
-        class_iii_yso_pixel_array, 
-        class_iii_yso_class_array,
-        Av_shape,
-    )
     # Initialize the contours
     contour_config = aa.load(contour_config_name)
     levels = np.array(contour_config[0], dtype = float)
@@ -177,45 +109,57 @@ def plot_star_forming_region(fig, gs_iterator, arguments):
     )
     #cbar = plt.colorbar(aximage)
     #cbar.set_label(r"$M_{sun}/kpc^{2}$", rotation = 270, labelpad = 15)
-    # YSO
-    ax.scatter(
-        on_image_class_i_yso_pixel_array[:,0],
-        on_image_class_i_yso_pixel_array[:,1],
-        color = 'r',
-        s = 3,
-        marker = 'x',
-        zorder = 100,
-    )
-    ax.scatter(
-        on_image_class_f_yso_pixel_array[:,0],
-        on_image_class_f_yso_pixel_array[:,1],
-        color = 'm',
-        s = 3,
-        marker = 'x',
-        zorder = 99,
-    )
-    ax.scatter(
-        on_image_class_ii_yso_pixel_array[:,0],
-        on_image_class_ii_yso_pixel_array[:,1],
-        color = 'c',
-        s = 3,
-        marker = 'x',
-        zorder = 98,
-    )
-    ax.scatter(
-        on_image_class_iii_yso_pixel_array[:,0],
-        on_image_class_iii_yso_pixel_array[:,1],
-        color = 'b',
-        s = 3,
-        marker = 'x',
-        zorder = 97,
-    )
+    # Define a routine for finding YSO on this map
+    def plot_routine(ax, coord_array, cls_pred_array, class_array, class_flag, color_scheme):
+        # Find the index
+        yso_index = None
+        if class_flag == 'all':
+            yso_index = np.where(cls_pred_array == 2)[0]
+        else:
+            yso_index = np.where((cls_pred_array == 2) & (class_array == class_flag))
+        # Confirm the coordinate    
+        if h_Av['CTYPE1'][:4] == 'GLON':
+            yso_coord_array = icrs2galactic(coord_array[yso_index]) 
+        else:
+            yso_coord_array = coord_array[yso_index]           
+        # Convert the world coordinate the pixel coordinate    
+        yso_pixel_array = np.array(np.round(
+            w_Av.wcs_world2pix(yso_coord_array, 0)), 
+            dtype = int
+        )
+        yso_class_array = class_array[yso_index]
+        # Take the YSO on the image only.
+        on_image_yso_pixel_array, on_image_yso_class_array = is_insided_the_image(
+            yso_pixel_array, 
+            yso_class_array,
+            Av_shape,
+        )
+        if on_image_yso_pixel_array.size == 0:
+            return
+        # Plot the YSO on the dustmap
+        ax.scatter(
+            on_image_yso_pixel_array[:,0],
+            on_image_yso_pixel_array[:,1],
+            color = color_scheme,
+            s = 3,
+            marker = 'x',
+            zorder = 100,
+        )
+        return 
+    
+    #plot_routine(ax, coord_array, cls_pred_array, class_array, 'all', 'r')
+    plot_routine(ax, coord_array, cls_pred_array, class_array, 'I', 'r')
+    plot_routine(ax, coord_array, cls_pred_array, class_array, 'Flat', 'm')
+    plot_routine(ax, coord_array, cls_pred_array, class_array, 'II','c')
+    plot_routine(ax, coord_array, cls_pred_array, class_array, 'III', 'b')
+    
     # Av contours
     plt.contour(
         Av, 
         levels = levels,
         linewidths = linewidths,
-        colors = colors,   
+        colors = 'w',
+        #colors = colors,   
         zorder = 2,
     )
     plt.text(
@@ -227,16 +171,12 @@ def plot_star_forming_region(fig, gs_iterator, arguments):
     plt.tick_params(
         axis='x',          # changes apply to the x-axis
         which='both',      # both major and minor ticks are affected
-        bottom=False,      # ticks along the bottom edge are off
-        top=False,         # ticks along the top edge are off
-        labelbottom=False, # labels along the bottom edge are off
+        direction='in'
     )
     plt.tick_params(
         axis='y',          # changes apply to the x-axis
         which='both',      # both major and minor ticks are affected
-        bottom=False,      # ticks along the bottom edge are off
-        top=False,         # ticks along the top edge are off
-        labelbottom=False, # labels along the bottom edge are off
+        direction='in'
     )
     return 
 
@@ -263,29 +203,77 @@ if __name__ == "__main__":
     if len(argv) != 8:
         print ("The number of arguments is wrong.")
         print ("Usage: Av_region_mass.py [contour config] [cloud_name] [column density map] [extinction map] [coord table] [cls pred table] [yso class table]") 
-        aa.create()
         exit()
-    contour_config_name = argv[1]
-    cloud_name = argv[2]
-    col_den_name = argv[3]
-    Av_name = argv[4]
-    coord_name = argv[5]
-    cls_pred_name = argv[6]
-    yso_class_name = argv[7]
+    contour_config_name_list_name = argv[1]
+    cloud_name_list_name = argv[2]
+    col_den_name_list_name = argv[3]
+    Av_name_list_name = argv[4]
+    coord_name_list_name = argv[5]
+    cls_pred_name_list_name = argv[6]
+    yso_class_name_list_name = argv[7]
     print("Arguments:\n{0}".format(np.array(argv)))
+    # Load argv
+    contour_config_name_list = np.loadtxt(contour_config_name_list_name, dtype = str)
+    cloud_name_list = np.loadtxt(cloud_name_list_name, dtype = str, delimiter = '\n')
+    col_den_name_list = np.loadtxt(col_den_name_list_name, dtype = str)
+    Av_name_list = np.loadtxt(Av_name_list_name, dtype = str)
+    coord_name_list = np.loadtxt(coord_name_list_name, dtype = str)
+    cls_pred_name_list = np.loadtxt(cls_pred_name_list_name, dtype = str)
+    yso_class_name_list = np.loadtxt(yso_class_name_list_name, dtype = str)
     #--------------------------------------------
     num_v = 5
     num_h = 3
-    fig = plt.figure(0, figsize=(9,12))
+    num_images_1page = num_v*num_h
+    num_images = 30
+    fig = plt.figure(0, figsize=(10,15))
     gs1 = gridspec.GridSpec(num_v, num_h)
-    gs1.update(wspace=0.0, hspace=0.0)
-    for i in range(num_v*num_h):
-        plot_star_forming_region(fig, gs1[i], argv) 
-    fig.tight_layout()
-    plt.savefig(
-        "{0}_dustmap_Avcontour_YSO_15images.png".format(cloud_name), 
-        dpi = 300
+    gs1.update(
+        wspace = 0.05, # the amount of width reserved for space between subplots,
+                      # expressed as a fraction of the average axis width
+        hspace = 0.08, # the amount of height reserved for space between subplots,
+        left = 0.05,  # the left side of the subplots of the figure
+        right = 1.0,   # the right side of the subplots of the figure
+        bottom = 0.05,  # the bottom of the subplots of the figure
+        top = 0.95,
     )
+    for i in range(num_images):
+        # Change the figure every 15 panels
+        if i%num_images_1page == 0 and i != 0:
+            # Save the last figure 
+            fig.savefig(
+                "dustmap_Avcontour_YSO_15images_{0}.png".format(i//num_images_1page -1),
+                dpi = 300,
+            )
+            plt.close()
+            # Create a new figure
+            fig = plt.figure(i//num_images_1page, figsize=(10,15))
+            gs1 = gridspec.GridSpec(num_v, num_h)
+            gs1.update(
+                wspace = 0.05, # the amount of width reserved for space between subplots,
+                              # expressed as a fraction of the average axis width
+                hspace = 0.08, # the amount of height reserved for space between subplots,
+                left = 0.05,  # the left side of the subplots of the figure
+                right = 1.0,   # the right side of the subplots of the figure
+                bottom = 0.05,  # the bottom of the subplots of the figure
+                top = 0.95,
+            )
+        arguments = [
+            argv[0],
+            contour_config_name_list[i],
+            cloud_name_list[i],
+            col_den_name_list[i],
+            Av_name_list[i],
+            coord_name_list[i],
+            cls_pred_name_list[i],
+            yso_class_name_list[i]
+        ]
+        plot_star_forming_region(fig, gs1[i%15], arguments) 
+    # Save the last figure 
+    fig.savefig(
+        "dustmap_Avcontour_YSO_15images_{0}.png".format(num_images//num_images_1page -1),
+        dpi = 300,
+    )
+    plt.close()
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
