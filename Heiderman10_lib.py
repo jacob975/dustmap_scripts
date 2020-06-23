@@ -20,7 +20,7 @@ Heiderman_cloud = np.array([
     [ 'Ser     ', 138 , 36, 3.29  , 1.8],
     [ 'AurN    ', 92.9, 11, 0.207 , 0.12],
     [ 'Aur     ', 92.4, 11, 0.854 , 0.49],
-    [ 'Cep     ', 68.7, 17, 0.776 , 0.45],
+    [ 'Cep     ', 68.7, 17, 0.776 , 0.45], # multiple regions
     [ 'Cha III ', 47.5, 10, 0.0357, 0.021],
     [ 'Cha I   ', 91.1, 12, 2.36  , 1.4],
     [ 'CrA     ', 92.1, 13, 3.37  , 2.2],
@@ -29,8 +29,8 @@ Heiderman_cloud = np.array([
     [ 'Lup VI  ', 67.5, 11, 1.66  , 1.0],
     [ 'Lup V   ', 60.3, 10, 0.915 , 0.55],
     [ 'Mus     ', 49.1, 10, 0.440 , 0.26],
-    [ 'Sco     ', 85.2, 23, 0.343 , 0.20],
-    [ 'Ser-Aqu ', 136 , 13, 2.01  , 1.1],
+    [ 'Sco     ', 85.2, 23, 0.343 , 0.20], # multiple regions
+    [ 'Ser-Aqu ', 136 , 13, 2.01  , 1.1], # multiple regions
 ], dtype = object)
 Heiderman_Av_regions_class_f = np.array([
 # Cloud, gas_sigma, sfr_sigma

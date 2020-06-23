@@ -43,6 +43,8 @@ if __name__ == "__main__":
     #--------------------------------------------
     # Initialization
     YSO_col_list = [
+        '`index`',
+        '`cloud`',
         '`cloud_surface_density_Msun_per_pc2`',
         '`e_cloud_surface_density_Msun_per_pc2`',
         '`sfr_surface_density_Msun_per_Myr_pc2`',
@@ -53,11 +55,12 @@ if __name__ == "__main__":
     # Obtain data from SQL
     c2d_gould_belt_data = load2py_mq_cloud(YSO_col_list)
     c2d_gould_belt_data = np.array(c2d_gould_belt_data, dtype=object)
-    gas_sigma_c2d_gould_belt =       np.array(c2d_gould_belt_data[:,0], dtype = float)
-    e_gas_sigma_c2d_gould_belt =     np.array(c2d_gould_belt_data[:,1], dtype = float)
-    sfr_sigma_c2d_gould_belt =       np.array(c2d_gould_belt_data[:,2], dtype = float)
-    e_sfr_sigma_c2d_gould_belt =     np.array(c2d_gould_belt_data[:,3], dtype = float)
-    flag_sfr_sigma_c2d_gould_belt =  np.array(c2d_gould_belt_data[:,4], dtype = str)
+    gas_sigma_c2d_gould_belt =       np.array(c2d_gould_belt_data[:31,0], dtype = float)
+    e_gas_sigma_c2d_gould_belt =     np.array(c2d_gould_belt_data[:31,1], dtype = float)
+    sfr_sigma_c2d_gould_belt =       np.array(c2d_gould_belt_data[:31,2], dtype = float)
+    e_sfr_sigma_c2d_gould_belt =     np.array(c2d_gould_belt_data[:31,3], dtype = float)
+    flag_sfr_sigma_c2d_gould_belt =  np.array(c2d_gould_belt_data[:31,4], dtype = str)
+    print(gas_sigma_c2d_gould_belt[-1])
     index_U_c2d_gould_belt = flag_sfr_sigma_c2d_gould_belt == 'U'
     #--------------------------------------------
     # Plot the figure
@@ -67,7 +70,7 @@ if __name__ == "__main__":
         xerr = e_gas_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
         y = sfr_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
         yerr = e_sfr_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
-        label = 'SFR-gas relation',
+        label = 'c2d and Gould belt clouds',
         color = 'b',
         fmt = 'o',
     )
@@ -75,7 +78,6 @@ if __name__ == "__main__":
     # Additional data
     #-------------
     # Heiderman+10
-    '''
     #TODO
     Heiderman_gas_sigma = np.array(Heiderman_cloud[:,index_HC.index('gas_sigma')], dtype = float)
     e_Heiderman_gas_sigma = np.array(Heiderman_cloud[:,index_HC.index('e_gas_sigma')], dtype = float)
@@ -90,7 +92,6 @@ if __name__ == "__main__":
         color = 'g',
         fmt = 'o',
     )
-    '''
     #-------------
     # Kennicutt+98
     # K-S relation
@@ -117,7 +118,7 @@ if __name__ == "__main__":
     ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
     ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr pc^{2}$)')
     ax.legend()
-    fig.savefig("chiu20_sfr_vs_gas.png")
+    fig.savefig("chiu20_sfr_vs_gas_cmp_Heiderman10.png")
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
