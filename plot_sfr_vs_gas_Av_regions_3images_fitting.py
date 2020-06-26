@@ -27,6 +27,7 @@ from sys import argv
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import curve_fit
 from chiu20_mysql_lib import load2py_mq_av_region, load2py_mq_cloud
 from Heiderman10_lib import Heiderman_cloud, Heiderman_Av_regions_class_f, Heiderman_Av_regions_class_i
 
@@ -139,13 +140,6 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         alpha = 0.5,
         s = 3,
     )
-    # Show the text
-    ax.text(
-        x = 0.05, 
-        y = 0.9, 
-        s = condition,
-        transform = ax.transAxes,
-    )    
     #--------------------------------------------
     # Additional data
     #-------------
@@ -182,6 +176,51 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         color = 'k', 
         label = 'Kennicut+98 ( KS relation)'
     )
+    #-----------------------------------
+    # Plot the fitting line of SFR-gas relation, and show the corresponding legend
+    def func_powerlaw(x, m, a):
+        return x**m * a 
+    def linear(x, m, b):
+        return m*x + b
+    inp_x = np.hstack((
+        np.log10(gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]), 
+        np.log10(gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)])
+    ))
+    inp_xerr = np.hstack((
+        np.log10((
+            e_gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)] +\
+            gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]) /\
+            gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
+        np.log10((
+            e_gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)] +\
+            gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]) /\
+            gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
+    )) 
+    inp_y = np.hstack((
+        np.log10(sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
+        np.log10(sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
+    ))
+    inp_yerr = np.hstack((
+        e_sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)],
+        e_sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)],
+    ))
+    #target_func = func_powerlaw
+    target_func = linear
+    popt, pcov = curve_fit(
+        target_func, 
+        inp_x, inp_y, 
+        sigma = 1/(inp_xerr**2),
+        #absolute_sigma=True,
+        maxfev = 2000, 
+        #p0=np.array([1.4, 1e-5]), # for powerlaw
+        p0=np.array([1.4, -4]), # for linear 
+    )
+    m = popt[0]
+    dm = np.sqrt(pcov[0,0])
+    b = popt[1]
+    db = np.sqrt(pcov[1,1])
+    out_x = np.linspace(1, 5, 100)
+    ax.plot(np.power(10, out_x), np.power(10, target_func(out_x, *popt)), 'r--')
     #-----------------------------------
     # Adjust and Save the figure
     ax.set_xscale('log')
@@ -221,13 +260,29 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         direction='in'
     )
     ax.grid(True)
-    if panel_order == 1:
-        ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
-        ax2.set_xlabel('A$_{v,RC}$')
     if panel_order == 0:
         ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr \cdot pc^{2}$)')
+        present_condition = "d <= 500pc"
+    if panel_order == 1:
+        ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
+        ax2.set_xlabel('A$_{v,RQ}$')
+        present_condition = "500pc < d <= 1000pc"
     if panel_order == 2:
-        pass
+        present_condition = "d > 1000pc"
+    # Show the text
+    ax.text(
+        x = 0.05, 
+        y = 0.95, 
+        s = "{0}\nM = {1:.2f}+-{2:.2f}\nb = {3:.2f}+-{4:.2f}".format(
+            present_condition, 
+            m, dm,
+            b, db
+        ),
+        transform = ax.transAxes,
+        horizontalalignment='left',
+        verticalalignment='top',
+        bbox=dict(facecolor='white', edgecolor='black', pad=5.0)
+    )    
         #ax.legend()
 
 #--------------------------------------------
@@ -252,7 +307,8 @@ if __name__ == "__main__":
     plot_sfr_gas_relation(axes[1], '500_1000pc', 1)
     plot_sfr_gas_relation(axes[2], 'over_1000pc', 2)
     plt.tight_layout()
-    fig.savefig("chiu20_sfr_vs_gas_Av_regions_3images.png", dpi = 150)
+    #plt.show()
+    fig.savefig("chiu20_sfr_vs_gas_Av_regions_3images_fitting.png", dpi = 150)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

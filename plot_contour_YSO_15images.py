@@ -79,10 +79,21 @@ def plot_star_forming_region(fig, gs_iterator, arguments):
     Av_shape = Av.shape
     h_Av = hdu_Av[1].header 
     w_Av = WCS(h_Av)
-    # Load YSO coordinates and classes
+     # Load YSO coordinates and classes
+    no_yso = False
+    no_cls_pred = False
+    no_class = False
     coord_array = np.loadtxt(coord_name, dtype= float)
-    cls_pred_array = np.loadtxt(cls_pred_name, dtype = int)
-    class_array = np.loadtxt(yso_class_name, dtype = object)
+    try:
+        cls_pred_array = np.loadtxt(cls_pred_name, dtype = int)
+    except:
+        no_cls_pred = True
+    try:
+        class_array = np.loadtxt(yso_class_name, dtype = object)
+    except:
+        no_class = True
+    if no_cls_pred or no_class:
+        no_yso = True
     # Initialize the contours
     contour_config = aa.load(contour_config_name)
     levels = np.array(contour_config[0], dtype = float)
@@ -94,6 +105,8 @@ def plot_star_forming_region(fig, gs_iterator, arguments):
     # Pixel Size
     pix_area_in_deg2_col = abs(h_col['CDELT1'] * h_col['CDELT2']) 
     pix_area_in_deg2_Av = abs(h_Av['CDELT1'] * h_Av['CDELT2'])
+    if no_cls_pred or no_class:
+        no_yso = True
     #--------------------------------------------
     # Plot the contour
     ax = plt.subplot(gs_iterator, projection = w_col)
@@ -148,10 +161,11 @@ def plot_star_forming_region(fig, gs_iterator, arguments):
         return 
     
     #plot_routine(ax, coord_array, cls_pred_array, class_array, 'all', 'r')
-    plot_routine(ax, coord_array, cls_pred_array, class_array, 'I', 'r')
-    plot_routine(ax, coord_array, cls_pred_array, class_array, 'Flat', 'm')
-    plot_routine(ax, coord_array, cls_pred_array, class_array, 'II','c')
-    plot_routine(ax, coord_array, cls_pred_array, class_array, 'III', 'b')
+    if not no_yso:
+        plot_routine(ax, coord_array, cls_pred_array, class_array, 'I', 'r')
+        plot_routine(ax, coord_array, cls_pred_array, class_array, 'Flat', 'm')
+        plot_routine(ax, coord_array, cls_pred_array, class_array, 'II','c')
+        plot_routine(ax, coord_array, cls_pred_array, class_array, 'III', 'b')
     
     # Av contours
     plt.contour(
@@ -224,7 +238,7 @@ if __name__ == "__main__":
     num_v = 5
     num_h = 3
     num_images_1page = num_v*num_h
-    num_images = 30
+    num_images = 62
     fig = plt.figure(0, figsize=(10,15))
     gs1 = gridspec.GridSpec(num_v, num_h)
     gs1.update(
@@ -270,7 +284,7 @@ if __name__ == "__main__":
         plot_star_forming_region(fig, gs1[i%15], arguments) 
     # Save the last figure 
     fig.savefig(
-        "dustmap_Avcontour_YSO_15images_{0}.png".format(num_images//num_images_1page -1),
+        "dustmap_Avcontour_YSO_15images_{0}.png".format(num_images//num_images_1page),
         dpi = 300,
     )
     plt.close()

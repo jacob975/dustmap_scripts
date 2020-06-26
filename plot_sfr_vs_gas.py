@@ -61,14 +61,14 @@ if __name__ == "__main__":
     index_U_c2d_gould_belt = flag_sfr_sigma_c2d_gould_belt == 'U'
     #--------------------------------------------
     # Plot the figure
-    fig, ax = plt.subplots(figsize = (8,8))
+    fig, ax = plt.subplots(figsize = (6,6))
     ax.errorbar(
         x = gas_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
         xerr = e_gas_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
         y = sfr_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
         yerr = e_sfr_sigma_c2d_gould_belt[~index_U_c2d_gould_belt],
         label = 'SFR-gas relation',
-        color = 'b',
+        color = 'k',
         fmt = 'o',
     )
     #--------------------------------------------
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         # sfr_sigma in Msun / Myr pc^2
         sfr_sigma = 2.5e-4 * np.power(gas_sigma, 1.4)
         return sfr_sigma
-    KS_gas_sigma = np.logspace(1, 3, 100)
+    KS_gas_sigma = np.logspace(1, 5, 100)
     KS_sfr_sigma = Kennicut98_sfr_sigma(KS_gas_sigma)
     ax.plot(
         KS_gas_sigma, 
@@ -111,13 +111,48 @@ if __name__ == "__main__":
     # Adjust and Save the figure
     ax.set_xscale('log')
     ax.set_yscale('log')
-    #ax.set_xlim(1e0, 1e3)
+    # Set the second x tick for Av,RC
+    x_upper = 1e1
+    x_lower = 1e3
+    # A_v,DL = 0.74*(dust_sigma/ (10^5 * M_sun / kpc^-2))
+    def get_AvDL(cloud_sigma):
+        nominator = 0.74 * cloud_sigma # M_sun pc-2
+        denominator = 10 # M_sun pc-2
+        return nominator/denominator
+    # A_v,RC = (0.38*U_min + 0.27) * A_v,DL
+    # by Assuming U_min = 0.5
+    def get_AvRC(AvDL):
+        return (0.38*0.5 + 0.27) * AvDL
+    ax2 = ax.twiny()
+    ax2.set_xscale('log')
+    ax2.set_xlim(
+        get_AvRC(get_AvDL(x_upper)),
+        get_AvRC(get_AvDL(x_lower)),
+    )
+    ax2.set_xlabel(r'A$_{V, RQ}$')
+    # Fine tune the panel
+    ax.tick_params(
+        axis = 'x',
+        which='both',
+        direction='in',
+    )
+    ax.tick_params(
+        axis = 'y',
+        which='both',
+        direction='in',
+    )
+    ax2.tick_params(
+        axis='x',
+        which='both',
+        direction='in',
+    )
+    ax.set_xlim(x_upper, x_lower)
     ax.set_ylim(1e-2, 1e1)
     ax.grid(True)
     ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
     ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr pc^{2}$)')
     ax.legend()
-    fig.savefig("chiu20_sfr_vs_gas.png")
+    fig.savefig("chiu20_sfr_vs_gas.png", dpi = 200)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

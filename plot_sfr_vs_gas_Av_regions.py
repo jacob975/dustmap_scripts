@@ -77,7 +77,7 @@ if __name__ == "__main__":
     index_U_class_F = flag_sfr_sigma_class_F == 'U'
     #--------------------------------------------
     # Plot the figure
-    fig, ax = plt.subplots(figsize = (8,8))
+    fig, ax = plt.subplots(figsize = (6,6))
     #----------
     # Class_I 
     ax.errorbar(
@@ -87,7 +87,9 @@ if __name__ == "__main__":
         yerr = e_sfr_sigma_class_I[~index_U_class_I],
         label= 'Class I YSO',
         color = 'b',
-        fmt = 'o'
+        fmt = 'o',
+        markersize = 3,
+        linewidth = 1,
     )
     # SFR Upper limits for Av regions without a YSO.
     ax.scatter(
@@ -97,6 +99,7 @@ if __name__ == "__main__":
         marker = 'v',
         color = 'b',
         alpha = 0.5,
+        s = 5,
     )
     #----------
     # Class_F
@@ -107,7 +110,9 @@ if __name__ == "__main__":
         yerr = e_sfr_sigma_class_F[~index_U_class_F],
         label='Class Flat YSO',
         color = 'm',
-        fmt = 'o'
+        fmt = 'o',
+        markersize = 3,
+        linewidth = 1,
     )
     # SFR Upper limits for Av regions without a YSO.
     ax.scatter(
@@ -117,6 +122,7 @@ if __name__ == "__main__":
         marker = 'v',
         color = 'm',
         alpha = 0.5,
+        s = 5,
     )
         
     #--------------------------------------------
@@ -147,7 +153,7 @@ if __name__ == "__main__":
         # sfr_sigma in Msun / Myr pc^2
         sfr_sigma = 2.5e-4 * np.power(gas_sigma, 1.4)
         return sfr_sigma
-    KS_gas_sigma = np.logspace(1, 3, 100)
+    KS_gas_sigma = np.logspace(1, 5, 100)
     KS_sfr_sigma = Kennicut98_sfr_sigma(KS_gas_sigma)
     ax.plot(
         KS_gas_sigma, 
@@ -159,13 +165,51 @@ if __name__ == "__main__":
     # Adjust and Save the figure
     ax.set_xscale('log')
     ax.set_yscale('log')
-    #ax.set_xlim(1e0, 1e3)
-    #ax.set_ylim(1e-2, 1e1)
+    # Set the second x tick for Av,RC
+    x_lower = 1e1
+    x_upper = 2e4
+    # A_v,DL = 0.74*(dust_sigma/ (10^5 * M_sun / kpc^-2))
+    def get_AvDL(cloud_sigma):
+        nominator = 0.74 * cloud_sigma # M_sun pc-2
+        denominator = 10 # M_sun pc-2
+        return nominator/denominator
+    # A_v,RC = (0.38*U_min + 0.27) * A_v,DL
+    # by Assuming U_min = 0.5
+    def get_AvRC(AvDL):
+        return (0.38*0.5 + 0.27) * AvDL
+    ax2 = ax.twiny()
+    ax2.set_xscale('log')
+    ax2.set_xlim(
+        get_AvRC(get_AvDL(x_lower)),
+        get_AvRC(get_AvDL(x_upper)),
+    )
+    ax2.set_xlabel(r'A$_{V,RQ}$')
+    # Fine tune the panel
+    ax.set_xlim(x_lower, x_upper)
+    ax.set_ylim(1e-3, 1e3)
     ax.grid(True)
     ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
     ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr pc^{2}$)')
+    ax.tick_params(
+        axis = 'x',
+        which='both',
+        direction='in',
+    )
+    ax.tick_params(
+        axis = 'y',
+        which='both',
+        direction='in',
+    )
+    ax2.tick_params(
+        axis='x',
+        which='both',
+        direction='in',
+    )
+
     ax.legend()
-    fig.savefig("chiu20_sfr_vs_gas_Av_regions_all_YSO.png")
+    fig.savefig(
+        "chiu20_sfr_vs_gas_Av_regions_all_YSO.png",
+        dpi = 200)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time
