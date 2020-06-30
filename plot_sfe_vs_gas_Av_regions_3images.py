@@ -3,7 +3,7 @@
 Abstract:
     Plot the SFR-gas relation in different Av contour regions (Without error consideration).
 Usage:
-    plot_sfr_vs_gas.py.
+    plot_sfe_vs_gas.py.
 Output:
     1. The figure of SFR surface density and gas surface density.
 Editor:
@@ -27,12 +27,11 @@ from sys import argv
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.optimize import curve_fit
 from chiu20_mysql_lib import load2py_mq_av_region, load2py_mq_cloud
 from Heiderman10_lib import Heiderman_cloud, Heiderman_Av_regions_class_f, Heiderman_Av_regions_class_i
 
 # Condition can be: 'less_500pc', '500_1000pc', 'over_1000pc'
-def plot_sfr_gas_relation(ax, condition, panel_order ):
+def plot_sfe_gas_relation(ax, condition, panel_order ):
     #--------------------------------------------
     # Initialization
     class_I_list = [
@@ -140,6 +139,13 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         alpha = 0.5,
         s = 3,
     )
+    # Show the text
+    ax.text(
+        x = 0.05, 
+        y = 0.9, 
+        s = condition,
+        transform = ax.transAxes,
+    )    
     #--------------------------------------------
     # Additional data
     #-------------
@@ -176,119 +182,6 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         color = 'k', 
         label = 'Kennicut+98 ( KS relation)'
     )
-    #-----------------------------------
-    # Plot the fitting line of SFR-gas relation, and show the corresponding legend
-    inp_x = np.hstack((
-        np.log10(gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]), 
-        np.log10(gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)])
-    ))
-    inp_xerr = np.hstack((
-        np.log10((
-            e_gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)] +\
-            gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]) /\
-            gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
-        np.log10((
-            e_gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)] +\
-            gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]) /\
-            gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
-    )) 
-    inp_y = np.hstack((
-        np.log10(sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
-        np.log10(sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
-    ))
-    inp_yerr = np.hstack((
-        np.log10((
-            e_sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)] +\
-            sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]) /\
-            sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
-        np.log10((
-            e_sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)] +\
-            sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]) /\
-            sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
-    )) 
-    # Fitting data with a power law
-    def func_powerlaw(x, m, a):
-        return x**m * a 
-    def linear(x, m, b):
-        return m*x + b
-    def bi_linear(x, m1, b, m2, xth):
-        ans = np.piecewise(
-            x, 
-            [x < xth, x >= xth], 
-            [lambda x:m1*x + b, lambda x:m1*xth + b + m2*(x-xth)]
-        )
-        return ans
-    def heiderman_broke_powerlaw(x, m1, b, m2, xth):
-        r1 = np.log10(0.38)
-        r2 = np.log10(2.63)
-        ans = np.piecewise(
-            x,
-            [x < xth+r2, x>= xth+r2],
-            [lambda x:m1*x + b +r1-m1*r2, lambda x:m1*xth+b + m2*(x-xth) +r1-m2*r2]
-        )
-        return ans
-    #   m1, b, m2, xth
-    heiderman_paras = [4.58, -9.18, 1.12, np.log10(129.2)]
-    def reduce_chi_square(x, y, yerr, func, paras):
-        chi_square = 0
-        dof = len(x) - len(paras)
-        for i, xi in enumerate(x):
-            chi_square_i = np.power(y[i] - func(xi, *paras), 2)/np.power(yerr[i], 2)
-            chi_square = chi_square + chi_square_i
-        reduce_chi_square = chi_square / dof
-        return reduce_chi_square
-    # Initialize
-    target_func = linear
-    p0 = np.array([1.4, -4.0])
-    if panel_order == 0:
-        pass
-    elif panel_order == 1:
-        target_func = bi_linear
-        # m1, b, m2, xth
-        p0 = np.array([1.0, -3.0, 2.1, 2.0])
-    print("before curve_fit, panel_order:{0}".format(panel_order))
-    popt, pcov = curve_fit(
-        target_func, 
-        inp_x, inp_y, 
-        sigma = 1/(inp_xerr**2),
-        #absolute_sigma=True,
-        maxfev = 2000, 
-        p0=p0,
-    )
-    print(popt)
-    print(pcov)
-    out_x = np.linspace(1, 5, 100)
-    ax.plot(np.power(10, out_x), np.power(10, target_func(out_x, *popt)), 'r--')
-    ax.plot(np.power(10, out_x), np.power(10, heiderman_broke_powerlaw(out_x, *heiderman_paras)), 'c--')
-    # Estimate the reduce chi square for the fitting result
-    rchisq_linear = reduce_chi_square(
-        inp_x, 
-        inp_y, 
-        inp_yerr, 
-        target_func,
-        popt
-    )
-    print(rchisq_linear)
-    rchisq_heiderman = reduce_chi_square(
-        inp_x, 
-        inp_y, 
-        inp_yerr, 
-        heiderman_broke_powerlaw,
-        heiderman_paras
-    )
-    print(rchisq_heiderman)
-    ax.text(
-        x = 0.7, 
-        y = 0.15, 
-        s = "$\chi_{r}$=%.3g\n$\chi_{r,H}$=%.3g" %(
-            rchisq_linear,
-            rchisq_heiderman
-        ),
-        transform = ax.transAxes,
-        horizontalalignment='left',
-        verticalalignment='top',
-        bbox=dict(facecolor='white', edgecolor='black', pad=5.0)
-    )    
     #-----------------------------------
     # Adjust and Save the figure
     ax.set_xscale('log')
@@ -328,60 +221,13 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         direction='in'
     )
     ax.grid(True)
+    if panel_order == 1:
+        ax.set_xlabel(r'gas surface density ($M_{sun} / pc^{2}$)')
+        ax2.set_xlabel('A$_{v,RC}$')
     if panel_order == 0:
         ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr \cdot pc^{2}$)')
-        present_condition = "d <= 500pc"
-        m = popt[0]
-        dm = np.sqrt(pcov[0,0])
-        b = popt[1]
-        db = np.sqrt(pcov[1,1])
-        # Show the text
-        ax.text(
-            x = 0.05, 
-            y = 0.95, 
-            s = "{0}\nM = {1:.2f}+-{2:.2f}\nb = {3:.2f}+-{4:.2f}".format(
-                present_condition, 
-                m, dm,
-                b, db
-            ),
-            transform = ax.transAxes,
-            horizontalalignment='left',
-            verticalalignment='top',
-            bbox=dict(facecolor='white', edgecolor='black', pad=5.0)
-        )    
-    if panel_order == 1:
-        ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr \cdot pc^{2}$)')
-        present_condition = "d <= 500pc"
-        m1 = popt[0]
-        dm1 = np.sqrt(pcov[0,0])
-        b = popt[1]
-        db = np.sqrt(pcov[1,1])
-        m2 = popt[2]
-        dm2 = np.sqrt(pcov[2,2])
-        xth = popt[3]
-        dxth = np.sqrt(pcov[3,3])
-        # Show the text
-        ax.scatter(
-            np.power(10,xth),
-            np.power(10, linear(xth, m1, b)),
-            color = 'r',
-            zorder = 101,
-        )
-        ax.text(
-            x = 0.05, 
-            y = 0.95, 
-            s = "{0}\nM1 = {1:.2f}+-{2:.2f}\nb = {3:.2f}+-{4:.2f}\nM2 = {5:.2f}+-{6:.2f}\nxth = {7:.2}+-{8:.2f}".format(
-                present_condition, 
-                m1, dm1,
-                b, db,
-                m2, dm2,
-                xth, dxth
-            ),
-            transform = ax.transAxes,
-            horizontalalignment='left',
-            verticalalignment='top',
-            bbox=dict(facecolor='white', edgecolor='black', pad=5.0)
-        )    
+    if panel_order == 2:
+        pass
         #ax.legend()
 
 #--------------------------------------------
@@ -393,20 +239,20 @@ if __name__ == "__main__":
     # Load argv
     if len(argv) != 1:
         print ("The number of arguments is wrong.")
-        print ("Usage: plot_sfr_vs_gas.py")
+        print ("Usage: plot_sfe_vs_gas.py")
         exit()
     #--------------------------------------------
     # Plot the figure
     fig, axes = plt.subplots(
-        1, 2, 
+        1, 3, 
         sharex=True, 
         sharey=True,
-        figsize=(8, 4))
-    plot_sfr_gas_relation(axes[0], 'less_500pc', 0)
-    plot_sfr_gas_relation(axes[1], 'less_500pc', 1)
+        figsize=(12, 4))
+    plot_sfe_gas_relation(axes[0], 'less_500pc', 0)
+    plot_sfe_gas_relation(axes[1], '500_1000pc', 1)
+    plot_sfe_gas_relation(axes[2], 'over_1000pc', 2)
     plt.tight_layout()
-    #plt.show()
-    fig.savefig("chiu20_sfr_vs_gas_Av_regions_powerlaw.png", dpi = 150)
+    fig.savefig("chiu20_sfe_vs_gas_Av_regions_3images.png", dpi = 150)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

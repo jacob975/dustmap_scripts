@@ -178,10 +178,28 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     )
     #-----------------------------------
     # Plot the fitting line of SFR-gas relation, and show the corresponding legend
-    def func_powerlaw(x, m, a):
-        return x**m * a 
+    def heiderman_broke_powerlaw(x, m1, b, m2, xth):
+        r1 = np.log10(0.38)
+        r2 = np.log10(2.63)
+        ans = np.piecewise(
+            x,
+            [x < xth+r2, x>= xth+r2],
+            [lambda x:m1*x + b +r1-m1*r2, lambda x:m1*xth+b + m2*(x-xth) +r1-m2*r2]
+        )
+        return ans
+    #   m1, b, m2, xth
+    heiderman_paras = [4.58, -9.18, 1.12, np.log10(129.2)]
     def linear(x, m, b):
         return m*x + b
+    def reduce_chi_square(x, y, yerr, func, paras):
+        chi_square = 0
+        dof = len(x) - len(paras)
+        for i, xi in enumerate(x):
+            chi_square_i = np.power(y[i] - func(xi, *paras), 2)/np.power(yerr[i], 2)
+            chi_square = chi_square + chi_square_i
+        reduce_chi_square = chi_square / dof
+        return reduce_chi_square
+
     inp_x = np.hstack((
         np.log10(gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]), 
         np.log10(gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)])
@@ -201,8 +219,15 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         np.log10(sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
     ))
     inp_yerr = np.hstack((
-        e_sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)],
-        e_sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)],
+        np.log10((
+            e_sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)] +\
+            sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]) /\
+            sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
+        np.log10((
+            e_sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)] +\
+            sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]) /\
+            sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
+    
     ))
     #target_func = func_powerlaw
     target_func = linear
@@ -221,6 +246,7 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     db = np.sqrt(pcov[1,1])
     out_x = np.linspace(1, 5, 100)
     ax.plot(np.power(10, out_x), np.power(10, target_func(out_x, *popt)), 'r--')
+    #ax.plot(np.power(10, out_x), np.power(10, heiderman_broke_powerlaw(out_x, *heiderman_paras)), 'c--')
     #-----------------------------------
     # Adjust and Save the figure
     ax.set_xscale('log')
@@ -260,6 +286,20 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         direction='in'
     )
     ax.grid(True)
+    rchisq_linear = reduce_chi_square(
+        inp_x, 
+        inp_y, inp_yerr, 
+        linear, 
+        popt)
+    print(rchisq_linear)
+    rchisq_heiderman = reduce_chi_square(
+        inp_x, 
+        inp_y, inp_yerr,
+        heiderman_broke_powerlaw, 
+        heiderman_paras
+    )
+    print(rchisq_heiderman)
+
     if panel_order == 0:
         ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr \cdot pc^{2}$)')
         present_condition = "d <= 500pc"
@@ -273,10 +313,11 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     ax.text(
         x = 0.05, 
         y = 0.95, 
-        s = "{0}\nM = {1:.2f}+-{2:.2f}\nb = {3:.2f}+-{4:.2f}".format(
+        s = "%s\nM = %.2f$\pm$%.2f\nb = %.2f$\pm$%.2f\n$\chi_{r}$=%.3g" % (
             present_condition, 
             m, dm,
-            b, db
+            b, db,
+            rchisq_linear,
         ),
         transform = ax.transAxes,
         horizontalalignment='left',

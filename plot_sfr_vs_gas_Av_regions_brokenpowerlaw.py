@@ -206,7 +206,6 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
             sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]) /\
             sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
     )) 
-    # Fitting data with a power law
     def func_powerlaw(x, m, a):
         return x**m * a 
     def linear(x, m, b):
@@ -218,25 +217,6 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
             [lambda x:m1*x + b, lambda x:m1*xth + b + m2*(x-xth)]
         )
         return ans
-    def heiderman_broke_powerlaw(x, m1, b, m2, xth):
-        r1 = np.log10(0.38)
-        r2 = np.log10(2.63)
-        ans = np.piecewise(
-            x,
-            [x < xth+r2, x>= xth+r2],
-            [lambda x:m1*x + b +r1-m1*r2, lambda x:m1*xth+b + m2*(x-xth) +r1-m2*r2]
-        )
-        return ans
-    #   m1, b, m2, xth
-    heiderman_paras = [4.58, -9.18, 1.12, np.log10(129.2)]
-    def reduce_chi_square(x, y, yerr, func, paras):
-        chi_square = 0
-        dof = len(x) - len(paras)
-        for i, xi in enumerate(x):
-            chi_square_i = np.power(y[i] - func(xi, *paras), 2)/np.power(yerr[i], 2)
-            chi_square = chi_square + chi_square_i
-        reduce_chi_square = chi_square / dof
-        return reduce_chi_square
     # Initialize
     target_func = linear
     p0 = np.array([1.4, -4.0])
@@ -244,8 +224,8 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         pass
     elif panel_order == 1:
         target_func = bi_linear
-        # m1, b, m2, xth
-        p0 = np.array([1.0, -3.0, 2.1, 2.0])
+
+        p0 = np.array([1.0, -4.0, 2.0, 2.0])
     print("before curve_fit, panel_order:{0}".format(panel_order))
     popt, pcov = curve_fit(
         target_func, 
@@ -259,36 +239,20 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     print(pcov)
     out_x = np.linspace(1, 5, 100)
     ax.plot(np.power(10, out_x), np.power(10, target_func(out_x, *popt)), 'r--')
-    ax.plot(np.power(10, out_x), np.power(10, heiderman_broke_powerlaw(out_x, *heiderman_paras)), 'c--')
     # Estimate the reduce chi square for the fitting result
-    rchisq_linear = reduce_chi_square(
+    '''
+    def get_reduce_chi_square(func, obs_x, e_obs_x, obs_y, num_paras):
+        num_obs = len(obs_x)
+        chi_square = 
+    
+    reduce_chi_square = get_reduce_chi_square(
+        target_func, 
         inp_x, 
         inp_y, 
         inp_yerr, 
-        target_func,
-        popt
+        num_paras
     )
-    print(rchisq_linear)
-    rchisq_heiderman = reduce_chi_square(
-        inp_x, 
-        inp_y, 
-        inp_yerr, 
-        heiderman_broke_powerlaw,
-        heiderman_paras
-    )
-    print(rchisq_heiderman)
-    ax.text(
-        x = 0.7, 
-        y = 0.15, 
-        s = "$\chi_{r}$=%.3g\n$\chi_{r,H}$=%.3g" %(
-            rchisq_linear,
-            rchisq_heiderman
-        ),
-        transform = ax.transAxes,
-        horizontalalignment='left',
-        verticalalignment='top',
-        bbox=dict(facecolor='white', edgecolor='black', pad=5.0)
-    )    
+    '''
     #-----------------------------------
     # Adjust and Save the figure
     ax.set_xscale('log')

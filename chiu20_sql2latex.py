@@ -54,16 +54,16 @@ if __name__ == "__main__":
         '`sfr_surface_density_Msun_per_Myr_pc2`',
         '`e_sfr_surface_density_Msun_per_Myr_pc2`',
         '`flag_sfr_surface_density_Msun_per_Myr_pc2`',
+        '`sfe`',
+        '`e_sfe`',
     ]
     #-----------------------------------
     # Obtain data from database
     # Obtain data from SQL
     c2d_gould_belt_data = load2py_mq_cloud(YSO_col_list)
     c2d_gould_belt_data = np.array(c2d_gould_belt_data, dtype=object)
-    for d in c2d_gould_belt_data:
-        print(d[4])
     # Save the table
-    #np.savetxt('cloud_in_latex.txt', c2d_gould_belt_data, delimiter = ' & ', fmt = '%s')
+    np.savetxt('cloud_in_latex_sfe.txt', c2d_gould_belt_data, delimiter = '&', fmt = '%.3g')
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

@@ -173,6 +173,19 @@ if __name__ == "__main__":
         which='both',
         direction='in',
     )
+    axes[0].text(
+        x = 0.05,
+        y = 0.95,
+        s = r'Ratio$_{gas}$=%.3g$\pm$%.2g' % (
+            avg_gas_sigma_ratio, 
+            std_gas_sigma_ratio
+        ),
+        transform = axes[0].transAxes,
+        horizontalalignment='left',
+        verticalalignment='top',
+        bbox=dict(facecolor='white', edgecolor='black', pad=5.0),
+        zorder = 101,
+    )
     #---------------
     # SFR
     x_upper = 1e1
@@ -223,6 +236,21 @@ if __name__ == "__main__":
         which='both',
         direction='in',
     )
+    axes[1].text(
+        x = 0.05,
+        y = 0.95,
+        s = r'Ratio$_{sfr}$=%.2g$\pm$%.2g' % (
+            avg_sfr_sigma_ratio, 
+            std_sfr_sigma_ratio
+        ),
+        transform = axes[1].transAxes,
+        horizontalalignment='left',
+        verticalalignment='top',
+        bbox=dict(facecolor='white', edgecolor='black', pad=5.0),
+        zorder = 101,
+    )
+    #----------------------------------
+    # Print out and save
     fig.tight_layout()
     plt.savefig(
         "sfr_gas_ratio_between_chiu20_and_Heiderman10", 
