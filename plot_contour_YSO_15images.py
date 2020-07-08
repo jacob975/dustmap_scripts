@@ -163,7 +163,7 @@ def plot_star_forming_region(fig, gs_iterator, arguments):
     #plot_routine(ax, coord_array, cls_pred_array, class_array, 'all', 'r')
     if not no_yso:
         plot_routine(ax, coord_array, cls_pred_array, class_array, 'I', 'r')
-        plot_routine(ax, coord_array, cls_pred_array, class_array, 'Flat', 'm')
+        plot_routine(ax, coord_array, cls_pred_array, class_array, 'Flat', 'y')
         plot_routine(ax, coord_array, cls_pred_array, class_array, 'II','c')
         plot_routine(ax, coord_array, cls_pred_array, class_array, 'III', 'b')
     
@@ -285,6 +285,35 @@ if __name__ == "__main__":
     # Save the last figure 
     fig.savefig(
         "dustmap_Avcontour_YSO_15images_{0}.png".format(num_images//num_images_1page),
+        dpi = 300,
+    )
+    for i in [60, 61]:
+        fig = plt.figure(i//num_images_1page, figsize=(10,3))
+        gs1 = gridspec.GridSpec(1, num_h)
+        gs1.update(
+            wspace = 0.05, # the amount of width reserved for space between subplots,
+                          # expressed as a fraction of the average axis width
+            hspace = 0.08, # the amount of height reserved for space between subplots,
+            left = 0.05,  # the left side of the subplots of the figure
+            right = 1.0,   # the right side of the subplots of the figure
+            bottom = 0.05,  # the bottom of the subplots of the figure
+            top = 0.95,
+        )
+        arguments = [
+            argv[0],
+            contour_config_name_list[i],
+            cloud_name_list[i],
+            col_den_name_list[i],
+            Av_name_list[i],
+            coord_name_list[i],
+            cls_pred_name_list[i],
+            yso_class_name_list[i]
+        ]
+        plot_star_forming_region(fig, gs1[i%15], arguments)
+
+    # Save the last figure 
+    fig.savefig(
+        "dustmap_Avcontour_YSO_15images_extra.png",
         dpi = 300,
     )
     plt.close()

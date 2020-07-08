@@ -28,9 +28,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
+from uncertainties import ufloat, unumpy
+
 from chiu20_mysql_lib import load2py_mq_av_region, load2py_mq_cloud
 from Heiderman10_lib import Heiderman_cloud, Heiderman_Av_regions_class_f, Heiderman_Av_regions_class_i
-
+from Heiderman10_lib import ratio_gas, ratio_sfr, Wu_cloud
 # Condition can be: 'less_500pc', '500_1000pc', 'over_1000pc'
 def plot_sfr_gas_relation(ax, condition, panel_order ):
     #--------------------------------------------
@@ -52,7 +54,7 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         '`distance_pc`',
     ]
     # Obtain data from SQL
-    # Class I, Zucker+20 sources only
+    # Class I
     class_I_data = load2py_mq_av_region(class_I_list)
     class_I_data = np.array(class_I_data, dtype=object)
     gas_sigma_class_I =       np.array(class_I_data[:,0], dtype = float)
@@ -73,7 +75,7 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         )
     elif condition == 'over_1000pc':
         index_distance_condition_class_I = distance_class_I > 1000
-    # Class Flat, Zucker+20 sources only
+    # Class Flat
     class_F_data = load2py_mq_av_region(class_F_list)
     class_F_data = np.array(class_F_data, dtype=object)
     gas_sigma_class_F =      np.array(class_F_data[:,0], dtype = float)
@@ -81,8 +83,21 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     sfr_sigma_class_F =      np.array(class_F_data[:,2], dtype = float)
     e_sfr_sigma_class_F =    np.array(class_F_data[:,3], dtype = float)
     flag_sfr_sigma_class_F = np.array(class_F_data[:,4], dtype = str)
-    distance_class_F =        np.array(class_F_data[:,5], dtype = float)
+    distance_class_F =       np.array(class_F_data[:,5], dtype = float)
     index_U_class_F = flag_sfr_sigma_class_F == 'U'
+    # Take Wu+05 data
+    gas_sigma_class_wu =     np.power(10, np.array(Wu_cloud[:,1], dtype = float))
+    e_gas_sigma_class_wu =   np.power(10, np.array(Wu_cloud[:,2], dtype = float))*gas_sigma_class_wu - gas_sigma_class_wu
+    u_gas_sigma_class_wu =   unumpy.uarray(gas_sigma_class_wu, e_gas_sigma_class_wu) 
+    u_gas_sigma_class_wu_shifted = u_gas_sigma_class_wu*ratio_gas
+    gas_sigma_class_wu_shifted = unumpy.nominal_values(u_gas_sigma_class_wu_shifted)
+    e_gas_sigma_class_wu_shifted = unumpy.std_devs(u_gas_sigma_class_wu_shifted)
+    sfr_sigma_class_wu =     np.power(10, np.array(Wu_cloud[:,3], dtype = float))
+    e_sfr_sigma_class_wu =   np.power(10, np.array(Wu_cloud[:,4], dtype = float))*sfr_sigma_class_wu - sfr_sigma_class_wu
+    u_sfr_sigma_class_wu =   unumpy.uarray(sfr_sigma_class_wu, e_sfr_sigma_class_wu) 
+    u_sfr_sigma_class_wu_shifted = u_sfr_sigma_class_wu*ratio_sfr
+    sfr_sigma_class_wu_shifted = unumpy.nominal_values(u_sfr_sigma_class_wu_shifted)
+    e_sfr_sigma_class_wu_shifted = unumpy.std_devs(u_sfr_sigma_class_wu_shifted)
     # Take the region inside the defined distance range
     index_distance_condition_class_F = None
     if condition == 'less_500pc':
@@ -96,17 +111,22 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         index_distance_condition_class_F = distance_class_F > 1000
     #----------
     # Class_I 
+    detected_gas_sigma_I = gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]
+    e_detected_gas_sigma_I = e_gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]
+    detected_sfr_sigma_I = sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]
+    e_detected_sfr_sigma_I = e_sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]
     ax.errorbar(
-        x = gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)],
-        xerr = e_gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)],
-        y = sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)],
-        yerr = e_sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)],
+        x = detected_gas_sigma_I,
+        xerr = e_detected_gas_sigma_I,
+        y = detected_sfr_sigma_I,
+        yerr = e_detected_sfr_sigma_I,
         label= 'Class I YSO',
         color = 'b',
         fmt = 'o',
         markersize = 2,
         linewidth = 1
     )
+
     # SFR Upper limits for Av regions without a YSO.
     ax.scatter(
         x = gas_sigma_class_I[(index_U_class_I) & (index_distance_condition_class_I)],
@@ -119,11 +139,15 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     )
     #----------
     # Class_F
+    detected_gas_sigma_F = gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]
+    e_detected_gas_sigma_F = e_gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]
+    detected_sfr_sigma_F = sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]
+    e_detected_sfr_sigma_F = e_sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]
     ax.errorbar(
-        x = gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)],
-        xerr = e_gas_sigma_class_F[(~index_U_class_F) & index_distance_condition_class_F],
-        y = sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)],
-        yerr = e_sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)],
+        x = detected_gas_sigma_F,
+        xerr = e_detected_gas_sigma_F,
+        y = detected_sfr_sigma_F,
+        yerr = e_detected_sfr_sigma_F,
         label='Class Flat YSO',
         color = 'm',
         fmt = 'o',
@@ -139,6 +163,19 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         color = 'm',
         alpha = 0.5,
         s = 3,
+    )
+    #------------
+    # Wu+05
+    ax.errorbar(
+        x = gas_sigma_class_wu_shifted,
+        xerr = e_gas_sigma_class_wu_shifted,
+        y = sfr_sigma_class_wu_shifted,
+        yerr = e_sfr_sigma_class_wu_shifted,
+        label = 'Wu+05',
+        color = 'y',
+        fmt = 's',
+        markersize = 3,
+        linewidth = 1
     )
     #--------------------------------------------
     # Additional data
@@ -163,6 +200,7 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     #-------------
     # Kennicutt+98
     # K-S relation
+    '''
     def Kennicut98_sfr_sigma(gas_sigma):
         # gas_sigma in Msun / pc^2
         # sfr_sigma in Msun / Myr pc^2
@@ -176,35 +214,28 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         color = 'k', 
         label = 'Kennicut+98 ( KS relation)'
     )
+    '''
     #-----------------------------------
     # Plot the fitting line of SFR-gas relation, and show the corresponding legend
     inp_x = np.hstack((
-        np.log10(gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]), 
-        np.log10(gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)])
+        np.log10(detected_gas_sigma_I), 
+        np.log10(detected_gas_sigma_F),
+        np.log10(gas_sigma_class_wu_shifted),
     ))
     inp_xerr = np.hstack((
-        np.log10((
-            e_gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)] +\
-            gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]) /\
-            gas_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
-        np.log10((
-            e_gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)] +\
-            gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]) /\
-            gas_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
+        np.log10((e_detected_gas_sigma_I+detected_gas_sigma_I)/detected_gas_sigma_I),
+        np.log10((e_detected_gas_sigma_F+detected_gas_sigma_F)/detected_gas_sigma_F),
+        np.log10((e_gas_sigma_class_wu_shifted + gas_sigma_class_wu_shifted)/gas_sigma_class_wu_shifted),
     )) 
     inp_y = np.hstack((
-        np.log10(sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
-        np.log10(sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
+        np.log10(detected_sfr_sigma_I), 
+        np.log10(detected_sfr_sigma_F),
+        np.log10(sfr_sigma_class_wu_shifted),
     ))
     inp_yerr = np.hstack((
-        np.log10((
-            e_sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)] +\
-            sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]) /\
-            sfr_sigma_class_I[(~index_U_class_I) & (index_distance_condition_class_I)]),
-        np.log10((
-            e_sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)] +\
-            sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]) /\
-            sfr_sigma_class_F[(~index_U_class_F) & (index_distance_condition_class_F)]),
+        np.log10((e_detected_sfr_sigma_I+detected_sfr_sigma_I)/detected_sfr_sigma_I),
+        np.log10((e_detected_sfr_sigma_F+detected_sfr_sigma_F)/detected_sfr_sigma_F),
+        np.log10((e_sfr_sigma_class_wu_shifted + sfr_sigma_class_wu_shifted)/sfr_sigma_class_wu_shifted),
     )) 
     # Fitting data with a power law
     def func_powerlaw(x, m, a):
@@ -229,6 +260,10 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         return ans
     #   m1, b, m2, xth
     heiderman_paras = [4.58, -9.18, 1.12, np.log10(129.2)]
+    m1h = heiderman_paras[0]
+    bh = heiderman_paras[1]
+    m2h = heiderman_paras[2]
+    xthh = heiderman_paras[3]
     def reduce_chi_square(x, y, yerr, func, paras):
         chi_square = 0
         dof = len(x) - len(paras)
@@ -245,21 +280,31 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     elif panel_order == 1:
         target_func = bi_linear
         # m1, b, m2, xth
-        p0 = np.array([1.0, -3.0, 2.1, 2.0])
+        p0 = np.array([4.0, -11.0, 2, 2.5])
     print("before curve_fit, panel_order:{0}".format(panel_order))
     popt, pcov = curve_fit(
         target_func, 
         inp_x, inp_y, 
-        sigma = 1/(inp_xerr**2),
-        #absolute_sigma=True,
+        sigma = inp_xerr,
+        absolute_sigma=True,
         maxfev = 2000, 
         p0=p0,
     )
     print(popt)
     print(pcov)
     out_x = np.linspace(1, 5, 100)
-    ax.plot(np.power(10, out_x), np.power(10, target_func(out_x, *popt)), 'r--')
-    ax.plot(np.power(10, out_x), np.power(10, heiderman_broke_powerlaw(out_x, *heiderman_paras)), 'c--')
+    ax.plot(
+        np.power(10, out_x), 
+        np.power(10, target_func(out_x, *popt)), 
+        'r--',
+        zorder = 100,
+    )
+    ax.plot(
+        np.power(10, out_x), 
+        np.power(10, heiderman_broke_powerlaw(out_x, *heiderman_paras)), 
+        'c--',
+        zorder = 100,
+    )
     # Estimate the reduce chi square for the fitting result
     rchisq_linear = reduce_chi_square(
         inp_x, 
@@ -278,12 +323,13 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     )
     print(rchisq_heiderman)
     ax.text(
-        x = 0.7, 
-        y = 0.15, 
-        s = "$\chi_{r}$=%.3g\n$\chi_{r,H}$=%.3g" %(
+        x = 0.05, 
+        y = 0.95, 
+        s = "$\chi_{r}^{2}$=%.2f\n$\chi_{r,H}^{2}$=%.2f" %(
             rchisq_linear,
             rchisq_heiderman
         ),
+        fontsize = 8,
         transform = ax.transAxes,
         horizontalalignment='left',
         verticalalignment='top',
@@ -310,6 +356,8 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         get_AvRC(get_AvDL(x_upper)),
         get_AvRC(get_AvDL(x_lower)),
     )
+    ax2.set_xlabel('A$_{V,RQ}$')
+    ax.set_xlabel('gas surface density (M$_{\odot}/$pc$^{2}$)')
     ax.set_xlim(x_upper, x_lower)
     ax.set_ylim(1e-3, 1e3)
     ax.tick_params(
@@ -329,21 +377,28 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     )
     ax.grid(True)
     if panel_order == 0:
-        ax.set_ylabel(r'SFR surface density ($M_{sun} / Myr \cdot pc^{2}$)')
+        ax.set_ylabel(r'SFR surface density ($M_{\odot} / Myr \cdot pc^{2}$)')
         present_condition = "d <= 500pc"
         m = popt[0]
         dm = np.sqrt(pcov[0,0])
         b = popt[1]
         db = np.sqrt(pcov[1,1])
+        # Show the broken point
+        ax.scatter(
+            np.power(10,xthh)*2.63,
+            np.power(10, linear(xthh, m1h, bh))*0.38,
+            color = 'c',
+            zorder = 101,
+        )
         # Show the text
         ax.text(
-            x = 0.05, 
-            y = 0.95, 
-            s = "{0}\nM = {1:.2f}+-{2:.2f}\nb = {3:.2f}+-{4:.2f}".format(
-                present_condition, 
+            x = 0.65, 
+            y = 0.15, 
+            s = "$N$ = %.2f$\pm$%.2f\nb = %.2f$\pm$%.2f" % (
                 m, dm,
                 b, db
             ),
+            fontsize = 8,
             transform = ax.transAxes,
             horizontalalignment='left',
             verticalalignment='top',
@@ -360,23 +415,30 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
         dm2 = np.sqrt(pcov[2,2])
         xth = popt[3]
         dxth = np.sqrt(pcov[3,3])
-        # Show the text
+        # Show the broken point
         ax.scatter(
             np.power(10,xth),
             np.power(10, linear(xth, m1, b)),
             color = 'r',
             zorder = 101,
         )
+        ax.scatter(
+            np.power(10,xthh)*2.63,
+            np.power(10, linear(xthh, m1h, bh))*0.38,
+            color = 'c',
+            zorder = 101,
+        )
+        # Show the text
         ax.text(
-            x = 0.05, 
-            y = 0.95, 
-            s = "{0}\nM1 = {1:.2f}+-{2:.2f}\nb = {3:.2f}+-{4:.2f}\nM2 = {5:.2f}+-{6:.2f}\nxth = {7:.2}+-{8:.2f}".format(
-                present_condition, 
+            x = 0.62, 
+            y = 0.25, 
+            s = "$N_{1}$ = %.2f$\pm$%.2f\nb = %.2f$\pm$%.2f\n$N_{2}$ = %.2f$\pm$%.2f\n$X_{th}$ = %d$\pm$%dM$_{\odot}$" % (
                 m1, dm1,
                 b, db,
                 m2, dm2,
-                xth, dxth
+                np.power(10,xth), np.power(10, xth)-np.power(10, xth+dxth)
             ),
+            fontsize = 8,
             transform = ax.transAxes,
             horizontalalignment='left',
             verticalalignment='top',

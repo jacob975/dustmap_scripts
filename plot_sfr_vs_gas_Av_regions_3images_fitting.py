@@ -234,11 +234,11 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     popt, pcov = curve_fit(
         target_func, 
         inp_x, inp_y, 
-        sigma = 1/(inp_xerr**2),
-        #absolute_sigma=True,
+        sigma = inp_yerr,
+        absolute_sigma=True,
         maxfev = 2000, 
         #p0=np.array([1.4, 1e-5]), # for powerlaw
-        p0=np.array([1.4, -4]), # for linear 
+        p0=np.array([1.6, -6]), # for linear 
     )
     m = popt[0]
     dm = np.sqrt(pcov[0,0])
@@ -313,7 +313,7 @@ def plot_sfr_gas_relation(ax, condition, panel_order ):
     ax.text(
         x = 0.05, 
         y = 0.95, 
-        s = "%s\nM = %.2f$\pm$%.2f\nb = %.2f$\pm$%.2f\n$\chi_{r}$=%.3g" % (
+        s = "%s\n$N$ = %.2f$\pm$%.2f\nb = %.2f$\pm$%.2f\n$\chi_{r}^{2}$=%.3g" % (
             present_condition, 
             m, dm,
             b, db,
@@ -349,7 +349,7 @@ if __name__ == "__main__":
     plot_sfr_gas_relation(axes[2], 'over_1000pc', 2)
     plt.tight_layout()
     #plt.show()
-    fig.savefig("chiu20_sfr_vs_gas_Av_regions_3images_fitting.png", dpi = 150)
+    fig.savefig("chiu20_sfr_vs_gas_Av_regions_3images_fitting.png", dpi = 200)
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

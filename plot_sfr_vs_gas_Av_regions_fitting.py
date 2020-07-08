@@ -225,12 +225,12 @@ if __name__ == "__main__":
         return m*x + b
     # Initialize
     target_func = linear
-    p0 = np.array([1.4, -4.0])
+    p0 = np.array([1.6, -6.0])
     popt, pcov = curve_fit(
         target_func,
         inp_x, inp_y,
-        sigma = 1/(inp_xerr**2),
-        #absolute_sigma=True,
+        sigma = inp_yerr,
+        absolute_sigma=True,
         maxfev = 2000,
         p0=p0,
     )
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     ax.text(
         x = 0.05,
         y = 0.95,
-        s = "M1 = %.2f$\pm$%.2f \nb = %.2f$\pm$%.2f\n$\chi^{2}_{r}$=%.2f" % (
+        s = "$N$ = %.2f$\pm$%.2f \nb = %.2f$\pm$%.2f\n$\chi^{2}_{r}$=%.2f" % (
             m, dm,
             b, db,
             rchisq,

@@ -185,7 +185,6 @@ if __name__ == "__main__":
         header = 'alpha, Lmir, L_bol',
         fmt = '%s',
     )
-    '''
     #-----------------------------------
     # Debug: Plot the histogram
     fig, axes = plt.subplots(figsize = (8,8))
@@ -196,7 +195,6 @@ if __name__ == "__main__":
     axes.set_xscale("log")
     axes.set_xlabel(r"$L_{bol}$")
     plt.savefig("L_bol_hist.png")
-    '''
     #-----------------------------------
     # Measure time
     elapsed_time = time.time() - start_time

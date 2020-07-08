@@ -94,6 +94,34 @@ if __name__ == "__main__":
             color = colors[i],
             fmt = 'o',
         )
+    # Plot average number of regions within 500 pc.
+    sfe_500pc = sfe[distance_pc < 500]*100
+    e_sfe_500pc = e_sfe[distance_pc < 500]*100
+    avg_sfe_500pc = np.average(sfe_500pc, weights = 1/e_sfe_500pc)
+    std_sfe_500pc = np.std(sfe_500pc)
+    print(avg_sfe_500pc, std_sfe_500pc)
+    sfe_1000pc = sfe[(distance_pc >= 500) & (distance_pc < 1000)]*100
+    e_sfe_1000pc = e_sfe[(distance_pc >= 500) & (distance_pc < 1000)]*100
+    avg_sfe_1000pc = np.average(sfe_1000pc, weights = 1/e_sfe_1000pc)
+    std_sfe_1000pc = np.std(sfe_1000pc)
+    print(avg_sfe_1000pc, std_sfe_1000pc)
+    out_x = np.array([1e2, 5e2])
+    out_y = np.ones(2)*avg_sfe_500pc
+    e_out_y = np.ones(2)*std_sfe_500pc
+    ax.fill_between(
+        out_x,
+        out_y- e_out_y,
+        out_y+ e_out_y,
+        alpha = 0.3,
+        facecolor = 'orange',
+        edgecolor = 'orange',
+    )
+    ax.plot(
+        out_x, out_y,
+        linestyle = '--',
+        c = 'orange',
+        zorder = 100,
+    )
     # Plot colorbar
     cmap = cm.rainbow
     norm = mpl.colors.Normalize(
@@ -103,43 +131,6 @@ if __name__ == "__main__":
     cb1 = mpl.colorbar.ColorbarBase(cax, cmap = cmap, norm = norm)
     cb1.set_label(r'$\Sigma_{gas}$ (M$_{\odot}$pc$^{-2}$)')
     #--------------------------------------------
-    # Additional data
-    #-------------
-    # Heiderman+10
-    '''
-    #TODO
-    Heiderman_gas_sigma = np.array(Heiderman_cloud[:,index_HC.index('gas_sigma')], dtype = float)
-    e_Heiderman_gas_sigma = np.array(Heiderman_cloud[:,index_HC.index('e_gas_sigma')], dtype = float)
-    Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,index_HC.index('sfr_sigma')], dtype = float)
-    e_Heiderman_sfr_sigma = np.array(Heiderman_cloud[:,index_HC.index('e_sfr_sigma')], dtype = float)
-    ax.errorbar(
-        x = Heiderman_gas_sigma,
-        xerr = e_Heiderman_gas_sigma,
-        y = Heiderman_sfr_sigma, 
-        yerr = e_Heiderman_sfr_sigma,
-        label = 'Heiderman+10 (c2d and Gould belt clouds)',
-        color = 'g',
-        fmt = 'o',
-    )
-    '''
-    #-------------
-    # Kennicutt+98
-    # K-S relation
-    '''
-    def Kennicut98_sfr_sigma(gas_sigma):
-        # gas_sigma in Msun / pc^2
-        # sfr_sigma in Msun / Myr pc^2
-        sfr_sigma = 2.5e-4 * np.power(gas_sigma, 1.4)
-        return sfr_sigma
-    KS_gas_sigma = np.logspace(1, 5, 100)
-    KS_sfr_sigma = Kennicut98_sfr_sigma(KS_gas_sigma)
-    ax.plot(
-        KS_gas_sigma, 
-        KS_sfr_sigma, 
-        color = 'k', 
-        label = 'Kennicut+98 ( KS relation)'
-    )
-    '''
     #-----------------------------------
     # Adjust and Save the figure
     ax.set_xscale('log')
@@ -147,24 +138,6 @@ if __name__ == "__main__":
     # Set the second x tick for Av,RC
     x_upper = 1e2
     x_lower = 1e4
-    '''
-    # A_v,DL = 0.74*(dust_sigma/ (10^5 * M_sun / kpc^-2))
-    def get_AvDL(cloud_sigma):
-        nominator = 0.74 * cloud_sigma # M_sun pc-2
-        denominator = 10 # M_sun pc-2
-        return nominator/denominator
-    # A_v,RC = (0.38*U_min + 0.27) * A_v,DL
-    # by Assuming U_min = 0.5
-    def get_AvRC(AvDL):
-        return (0.38*0.5 + 0.27) * AvDL
-    ax2 = ax.twiny()
-    ax2.set_xscale('log')
-    ax2.set_xlim(
-        get_AvRC(get_AvDL(x_upper)),
-        get_AvRC(get_AvDL(x_lower)),
-    )
-    ax2.set_xlabel(r'A$_{V, RQ}$')
-    '''
     # Fine tune the panel
     ax.tick_params(
         axis = 'x',
@@ -176,13 +149,19 @@ if __name__ == "__main__":
         which='both',
         direction='in',
     )
-    '''
-    ax2.tick_params(
-        axis='x',
-        which='both',
-        direction='in',
+    ax.text(
+        x = 0.55,
+        y = 0.95,
+        s = 'SFE$_{d<500pc}$=%.2g$\pm$%.2f %%' % (
+            avg_sfe_500pc,
+            std_sfe_500pc
+        ),
+        transform = ax.transAxes,
+        horizontalalignment='left',
+        verticalalignment='top',
+        bbox=dict(facecolor='white', edgecolor='black', pad=5.0),
+        zorder = 101,
     )
-    '''
     ax.set_xlim(x_upper, x_lower)
     #ax.set_ylim(1e-2, 1e1)
     ax.grid(True)
