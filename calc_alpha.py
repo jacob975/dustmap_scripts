@@ -61,7 +61,7 @@ def sed_to_alpha(sed, Q):
         # Index start at 3 because we skip band J, H, and K.
         band_flux = sed[2+i]
         e_band_flux = sed[8+2+i]
-        wavelength = 10*spitzer_system[band_name][1] # um
+        wavelength = 1e-4*spitzer_system[band_name][1] # um to cm
         # Specific freq. to specific flux
         cvt = cs / (wavelength**2) # cm-1 s-1
         log_l_F.append(np.log(wavelength * cvt * band_flux))
